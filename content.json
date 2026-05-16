@@ -1,0 +1,109 @@
+{
+  "hero": {
+    "name": "Samridh Kudesia",
+    "photo": "",
+    "tagline": "Product thinker building at the intersection of AI, education, and consumer tech.",
+    "links": {
+      "linkedin": "https://www.linkedin.com/in/samridhkudesia/",
+      "email": "samridh@gmail.com"
+    }
+  },
+  "timeline": [
+    {
+      "id": "1",
+      "company": "Park+",
+      "role": "Product Manager",
+      "subtext": "Building India's mobility future, one parking spot at a time.",
+      "website": "https://parkplus.io",
+      "startDate": "2022",
+      "endDate": "Present",
+      "duration": "2+ yrs",
+      "bullets": [
+        "Led product strategy for India's largest parking & mobility super-app",
+        "Owned CRM and mobile app roadmap serving millions of urban users",
+        "Collaborated cross-functionally with design, engineering, and growth teams"
+      ]
+    },
+    {
+      "id": "2",
+      "company": "Plaksha University",
+      "role": "Founders' Office — Program Lead",
+      "subtext": "Helping reimagine what a technology university could look like in India.",
+      "website": "https://plaksha.edu.in",
+      "startDate": "2021",
+      "endDate": "2022",
+      "duration": "~1 yr",
+      "bullets": [
+        "Worked in the Founders' Office helping build a next-generation tech university",
+        "Spearheaded launch of a quality AI/ML program for advanced tech education",
+        "Drove initiatives to foster innovation and accessibility in specialized academia"
+      ]
+    },
+    {
+      "id": "3",
+      "company": "Leap Finance",
+      "role": "Associate",
+      "subtext": "Making international education financially accessible for Indian students.",
+      "website": "https://leapfinance.com",
+      "startDate": "2020",
+      "endDate": "2021",
+      "duration": "~1 yr",
+      "bullets": [
+        "Contributed to fintech product and operations at a leading EdFintech startup",
+        "Supported international student financing product lines"
+      ]
+    },
+    {
+      "id": "4",
+      "company": "Kuar — Koç University Arçelik Research Center",
+      "role": "Research Intern",
+      "subtext": "Exploring the intersection of design, creativity, and human-computer interaction.",
+      "website": "https://kuar.ku.edu.tr",
+      "startDate": "2019",
+      "endDate": "2020",
+      "duration": "~1 yr",
+      "bullets": [
+        "Conducted research in creative industries and human-computer interaction",
+        "Contributed to academic publications on design and technology innovation"
+      ]
+    }
+  ],
+  "resume": {
+    "label": "Download Resume",
+    "url": "https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link"
+  },
+  "projects": [
+    {
+      "id": "1",
+      "title": "Park+ Mobility Super-App",
+      "description": "Led product for India's largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.",
+      "url": "https://parkplus.io",
+      "tags": ["Product", "Mobile", "Mobility"]
+    },
+    {
+      "id": "2",
+      "title": "Plaksha AI/ML Program",
+      "description": "Designed and launched a rigorous AI/ML curriculum at Plaksha University to democratize advanced tech education.",
+      "url": "https://plaksha.edu.in",
+      "tags": ["Education", "AI", "Program Design"]
+    }
+  ],
+  "quiz": [],
+  "write": [],
+  "contact": {
+    "email": "samridh@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/samridhkudesia/",
+    "note": "Open to interesting conversations about product, AI, and education."
+  },
+  "visibility": {
+    "experience": true,
+    "projects": true,
+    "quiz": true,
+    "write": true,
+    "reading": true,
+    "watch": true,
+    "wishlist": true,
+    "contact": true
+  },
+  "wishlistItems": []
+}

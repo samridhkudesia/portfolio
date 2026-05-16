@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Samridh Kudesia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #111010; --surface: #1a1917; --surface2: #232120;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.13);
+      --text: #e8dfd0; --muted: rgba(232,223,208,0.45); --muted2: rgba(232,223,208,0.22);
+      --accent: #c8520a; --green: #4ec994; --yellow: #d4a017; --red: #e05555;
+      --sans: 'DM Sans', system-ui, sans-serif; --mono: 'DM Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
+
+    /* LOGIN */
+    #login-screen { position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
+    #login-screen.hidden { display:none; }
+    .login-card { width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:2.5rem; box-shadow:0 24px 80px rgba(0,0,0,0.5); }
+    .login-logo { font-size:2rem; margin-bottom:1.2rem; }
+    .login-card h1 { font-size:1.3rem; font-weight:700; margin-bottom:0.3rem; }
+    .login-card p { font-size:0.82rem; color:var(--muted); margin-bottom:2rem; }
+    .lf { margin-bottom:1rem; }
+    .lf label { display:block; font-size:0.7rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+    .lf input { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border2); border-radius:8px; padding:0.65rem 0.9rem; color:var(--text); font-family:var(--sans); font-size:0.9rem; outline:none; transition:border-color .2s; }
+    .lf input:focus { border-color:rgba(200,82,10,0.6); }
+    .login-error { font-size:0.8rem; color:var(--red); margin-bottom:0.8rem; display:none; }
+    .login-error.show { display:block; }
+    .btn-login { width:100%; background:var(--accent); color:#fff; border:none; border-radius:99px; padding:0.72rem; font-size:0.9rem; font-weight:500; cursor:pointer; transition:background .2s; margin-top:0.5rem; }
+    .btn-login:hover { background:#a8420a; }
+    .login-note { font-size:0.72rem; color:var(--muted2); text-align:center; margin-top:1.2rem; line-height:1.6; }
+
+    /* LAYOUT */
+    #admin-app { display:none; min-height:100vh; flex-direction:column; }
+    #admin-app.visible { display:flex; }
+
+    .topbar { position:sticky; top:0; z-index:50; height:52px; background:rgba(17,16,16,0.97); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; gap:1rem; }
+    .tb-left { display:flex; align-items:center; gap:0.75rem; }
+    .tb-brand { font-size:0.9rem; font-weight:600; }
+    .live-pill { display:inline-flex; align-items:center; gap:5px; font-size:0.65rem; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; color:var(--green); background:rgba(78,201,148,0.1); border:1px solid rgba(78,201,148,0.2); padding:2px 9px; border-radius:99px; }
+    .live-pill::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+    .tb-right { display:flex; align-items:center; gap:0.75rem; flex-shrink:0; }
+    /* Save status pill — three states: idle/saving/saved/error */
+    #save-status { font-size:0.75rem; font-weight:500; padding:3px 10px; border-radius:99px; border:1px solid; transition:all .25s; white-space:nowrap; }
+    #save-status.idle   { color:var(--muted); border-color:var(--border); background:transparent; }
+    #save-status.saving { color:var(--yellow); border-color:rgba(212,160,23,0.35); background:rgba(212,160,23,0.08); }
+    #save-status.saved  { color:var(--green);  border-color:rgba(78,201,148,0.35); background:rgba(78,201,148,0.08); }
+    #save-status.error  { color:var(--red);    border-color:rgba(224,85,85,0.35);  background:rgba(224,85,85,0.08); }
+    /* Deploy status */
+    #deploy-status { font-size:0.72rem; color:var(--muted); white-space:nowrap; }
+    #deploy-status a { color:var(--accent); text-decoration:none; }
+    .view-btn { font-size:0.78rem; font-weight:500; color:var(--muted); background:rgba(255,255,255,0.05); border:1px solid var(--border2); border-radius:99px; padding:5px 14px; text-decoration:none; transition:all .2s; }
+    .view-btn:hover { color:var(--text); border-color:rgba(255,255,255,0.25); }
+    .logout-btn { font-size:0.78rem; color:var(--muted); background:none; border:none; cursor:pointer; transition:color .2s; padding:5px; }
+    .logout-btn:hover { color:var(--red); }
+
+    .admin-body { display:flex; flex:1; }
+
+    /* SIDEBAR */
+    .sidebar { width:200px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); padding:1.2rem 0; position:sticky; top:52px; height:calc(100vh - 52px); overflow-y:auto; }
+    .sb-label { font-size:0.65rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); display:block; padding:0.3rem 1rem 0.4rem; }
+    .sb-btn { display:block; width:calc(100% - 1rem); text-align:left; padding:0.48rem 0.75rem; margin:0 0.5rem; border-radius:7px; background:none; border:none; color:var(--muted); font-size:0.84rem; cursor:pointer; transition:all .18s; }
+    .sb-btn:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+    .sb-btn.active { background:rgba(200,82,10,0.12); color:var(--accent); font-weight:500; }
+    .sb-div { height:1px; background:var(--border); margin:0.6rem 1rem; }
+
+    /* CONTENT */
+    .content { flex:1; padding:2rem; max-width:760px; }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+    .pane-title { font-size:1.1rem; font-weight:600; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; }
+
+    /* FORM */
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .field { margin-bottom:1rem; }
+    .field label { display:block; font-size:0.7rem; font-weight:500; letter-spacing:0.07em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+    .field input,.field textarea,.field select { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border2); border-radius:8px; padding:0.6rem 0.85rem; color:var(--text); font-family:var(--sans); font-size:0.88rem; resize:vertical; outline:none; transition:border-color .2s; line-height:1.5; }
+    .field input:focus,.field textarea:focus { border-color:rgba(200,82,10,0.55); }
+    .field textarea { min-height:80px; }
+    .field-hint { font-size:0.7rem; color:var(--muted2); margin-top:0.25rem; line-height:1.5; }
+
+    /* ITEM CARDS */
+    .item-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:1.1rem; margin-bottom:0.9rem; }
+    .ic-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.9rem; }
+    .ic-title { font-size:0.88rem; font-weight:600; }
+    .ic-actions { display:flex; gap:0.4rem; }
+    .btn-sm { font-size:0.72rem; font-weight:500; padding:3px 10px; border-radius:6px; border:1px solid; cursor:pointer; transition:all .2s; }
+    .btn-del { background:rgba(224,85,85,0.1); color:var(--red); border-color:rgba(224,85,85,0.2); }
+    .btn-del:hover { background:rgba(224,85,85,0.25); }
+    .btn-mv { background:rgba(255,255,255,0.05); color:var(--muted); border-color:var(--border2); }
+    .btn-mv:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+    .btn-add { width:100%; padding:0.6rem; background:rgba(200,82,10,0.08); color:var(--accent); border:1px dashed rgba(200,82,10,0.3); border-radius:8px; font-size:0.82rem; font-weight:500; cursor:pointer; transition:all .2s; margin-top:0.4rem; }
+    .btn-add:hover { background:rgba(200,82,10,0.16); border-style:solid; }
+
+    /* VISIBILITY TOGGLES */
+    .toggle-grid { display:grid; gap:0.8rem; }
+    .toggle-row { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:1rem 1.2rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .toggle-name { font-size:0.9rem; font-weight:500; margin-bottom:0.1rem; }
+    .toggle-desc { font-size:0.75rem; color:var(--muted); }
+    .toggle-sw { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle-sw input { opacity:0; width:0; height:0; position:absolute; }
+    .toggle-track { position:absolute; inset:0; background:rgba(255,255,255,0.12); border-radius:99px; cursor:pointer; transition:.25s; }
+    .toggle-track::before { content:''; position:absolute; width:18px; height:18px; border-radius:50%; background:#fff; left:3px; top:3px; transition:.25s; }
+    .toggle-sw input:checked + .toggle-track { background:var(--accent); }
+    .toggle-sw input:checked + .toggle-track::before { transform:translateX(20px); }
+
+    /* PHOTO */
+    .photo-row { display:flex; align-items:center; gap:1.2rem; margin-bottom:1rem; }
+    .photo-prev { width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; overflow:hidden; border:2px solid var(--border2); }
+    .photo-prev img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .photo-btns { display:flex; flex-direction:column; gap:0.35rem; }
+    .btn-photo { font-size:0.75rem; font-weight:500; padding:4px 12px; border-radius:6px; background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid var(--border2); cursor:pointer; transition:all .2s; }
+    .btn-photo:hover { background:rgba(255,255,255,0.12); color:var(--text); }
+
+    /* INFO BOX */
+    .info-box { font-size:0.8rem; color:var(--muted); margin-bottom:1.2rem; line-height:1.7; padding:0.9rem 1rem; background:rgba(200,82,10,0.06); border:1px solid rgba(200,82,10,0.15); border-radius:8px; }
+    .info-box a { color:var(--accent); } .info-box strong { color:var(--text); }
+
+    /* RTE */
+    .rte-wrap { border:1px solid var(--border2); border-radius:10px; overflow:hidden; margin-bottom:0.5rem; }
+    .rte-toolbar { display:flex; flex-wrap:wrap; gap:2px; padding:0.5rem 0.6rem; background:rgba(255,255,255,0.04); border-bottom:1px solid var(--border); align-items:center; }
+    .rte-btn { background:none; border:1px solid transparent; border-radius:5px; color:var(--muted); font-size:0.78rem; font-family:var(--sans); padding:3px 7px; cursor:pointer; transition:all .15s; white-space:nowrap; line-height:1.4; }
+    .rte-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); border-color:var(--border2); }
+    .rte-sep { width:1px; height:18px; background:var(--border); margin:0 2px; align-self:center; }
+    .rte-editor { min-height:320px; max-height:600px; overflow-y:auto; padding:1.2rem; outline:none; color:var(--text); font-family:var(--sans); font-size:0.92rem; line-height:1.75; background:rgba(255,255,255,0.02); }
+    .rte-editor:empty::before { content:attr(placeholder); color:var(--muted2); pointer-events:none; }
+    .rte-editor h1 { font-size:1.7rem; font-weight:700; margin:1.2rem 0 0.5rem; }
+    .rte-editor h2 { font-size:1.3rem; font-weight:700; margin:1.1rem 0 0.4rem; }
+    .rte-editor h3 { font-size:1.05rem; font-weight:600; margin:1rem 0 0.3rem; }
+    .rte-editor p { margin:0 0 0.8rem; }
+    .rte-editor ul,.rte-editor ol { padding-left:1.4rem; margin-bottom:0.8rem; }
+    .rte-editor blockquote { border-left:3px solid var(--accent); padding:0.3rem 0 0.3rem 1rem; margin:1rem 0; color:var(--muted); font-style:italic; }
+    .rte-editor a { color:var(--accent); }
+    .rte-editor img { max-width:100%; border-radius:6px; margin:0.5rem 0; display:block; }
+    .rte-editor iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:6px; margin:0.5rem 0; display:block; background:rgba(0,0,0,0.3); }
+
+    /* EXPORT */
+    .code-preview { background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:1rem; font-family:var(--mono); font-size:0.73rem; color:rgba(232,223,208,0.7); white-space:pre; overflow-x:auto; max-height:260px; overflow-y:auto; }
+    .export-btns { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.8rem; }
+    .btn-exp { flex:1; min-width:110px; padding:0.55rem 1rem; border-radius:8px; font-size:0.82rem; font-weight:500; cursor:pointer; transition:all .2s; }
+    .btn-exp-copy { background:rgba(200,82,10,0.1); color:var(--accent); border:1px solid rgba(200,82,10,0.25); }
+    .btn-exp-copy:hover { background:rgba(200,82,10,0.2); }
+    .btn-exp-dl { background:rgba(78,201,148,0.1); color:var(--green); border:1px solid rgba(78,201,148,0.25); }
+    .btn-exp-dl:hover { background:rgba(78,201,148,0.2); }
+    .btn-exp-reset { background:rgba(224,85,85,0.08); color:var(--red); border:1px solid rgba(224,85,85,0.2); }
+    .btn-exp-reset:hover { background:rgba(224,85,85,0.2); }
+    .deploy-box { margin-top:1.5rem; padding:1rem; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; }
+    .deploy-box .dl { font-size:0.72rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:0.6rem; }
+    .deploy-box p { font-size:0.78rem; color:rgba(232,223,208,0.4); line-height:1.8; }
+    .deploy-box code { color:var(--text); font-family:var(--mono); font-size:0.77rem; }
+    .env-table { width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:0.8rem; }
+    .env-table th { text-align:left; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted2); padding:0.4rem 0.6rem; border-bottom:1px solid var(--border); }
+    .env-table td { padding:0.55rem 0.6rem; border-bottom:1px solid var(--border); vertical-align:top; color:rgba(232,223,208,0.6); }
+    .env-table td:first-child { font-family:var(--mono); font-size:0.75rem; color:var(--accent); white-space:nowrap; }
+    .env-table tr:last-child td { border-bottom:none; }
+
+    @media (max-width:640px) {
+      .sidebar { display:none; } .content { padding:1.2rem; } .field-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h1>Admin Login</h1>
+    <p>Samridh Kudesia · Portfolio CMS</p>
+    <div class="lf"><label>Email</label><input type="email" id="l-email" autocomplete="email" /></div>
+    <div class="lf"><label>Password</label><input type="password" id="l-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <div class="login-error" id="l-err">Incorrect email or password.</div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <p class="login-note">Restricted to the site owner.<br>Change credentials in the Export tab.</p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app">
+  <div class="topbar">
+    <div class="tb-left">
+      <span class="tb-brand">⚡ Portfolio CMS</span>
+      <span class="live-pill">Live</span>
+    </div>
+    <div class="tb-right">
+      <span id="deploy-status"></span>
+      <span id="save-status" class="idle">No unsaved changes</span>
+      <button id="publish-btn" onclick="publishToGitHub()" style="background:var(--accent);color:#fff;border:none;border-radius:99px;padding:5px 16px;font-size:0.78rem;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap" onmouseover="this.style.background='#a8420a'" onmouseout="this.style.background='var(--accent)'">↑ Publish</button>
+      <a href="/" target="_blank" class="view-btn">View Site ↗</a>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <aside class="sidebar">
+      <div class="sb-label">Content</div>
+      <button class="sb-btn active" onclick="showTab('hero',this)">👤 Hero</button>
+      <button class="sb-btn" onclick="showTab('timeline',this)">💼 Timeline</button>
+      <button class="sb-btn" onclick="showTab('projects',this)">🛠 Projects</button>
+      <button class="sb-btn" onclick="showTab('quiz',this)">🧠 Quiz</button>
+      <button class="sb-btn" onclick="showTab('write',this)">✍ Write</button>
+      <button class="sb-btn" onclick="showTab('contact',this)">✉ Contact</button>
+      <div class="sb-div"></div>
+      <div class="sb-label">Integrations</div>
+      <button class="sb-btn" onclick="showTab('reading',this)">📚 Reading</button>
+      <button class="sb-btn" onclick="showTab('watch',this)">▶ Watch</button>
+      <button class="sb-btn" onclick="showTab('wishlist',this)">🎁 Wishlist</button>
+      <div class="sb-div"></div>
+      <div class="sb-label">Settings</div>
+      <button class="sb-btn" onclick="showTab('visibility',this)">👁 Visibility</button>
+      <button class="sb-btn" onclick="showTab('setup',this)">⚙ Setup</button>
+    </aside>
+
+    <div class="content">
+
+      <!-- HERO -->
+      <div class="tab-pane active" id="pane-hero">
+        <div class="pane-title">👤 Hero Section</div>
+        <div class="photo-row">
+          <div class="photo-prev" id="photo-prev">SK</div>
+          <div class="photo-btns">
+            <button class="btn-photo" onclick="document.getElementById('photo-file').click()">Upload Photo</button>
+            <button class="btn-photo" onclick="clearPhoto()">Remove Photo</button>
+            <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
+          </div>
+        </div>
+        <div class="field"><label>Photo URL</label>
+          <input type="text" id="f-photo-url" placeholder="https://…" oninput="DATA.hero.photo=this.value;updatePhotoPreview();markDirty()" /></div>
+        <div class="field-row">
+          <div class="field"><label>Full Name</label><input type="text" id="f-name" oninput="DATA.hero.name=this.value;markDirty()" /></div>
+          <div class="field"><label>Email</label><input type="text" id="f-email" oninput="DATA.hero.links.email=this.value;markDirty()" /></div>
+        </div>
+        <div class="field"><label>Tagline</label><input type="text" id="f-tagline" oninput="DATA.hero.tagline=this.value;markDirty()" /></div>
+        <div class="field"><label>LinkedIn URL</label><input type="text" id="f-linkedin" oninput="DATA.hero.links.linkedin=this.value;markDirty()" /></div>
+        <div class="field"><label>Resume Button Label</label><input type="text" id="f-resume-label" oninput="DATA.resume.label=this.value;markDirty()" /></div>
+        <div class="field"><label>Resume URL</label><input type="text" id="f-resume-url" oninput="DATA.resume.url=this.value;markDirty()" />
+          <div class="field-hint">Google Drive, Dropbox, or any direct link.</div></div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="tab-pane" id="pane-timeline">
+        <div class="pane-title">💼 Professional Timeline</div>
+        <div id="tl-cards"></div>
+        <button class="btn-add" onclick="addTL()">+ Add Role</button>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="tab-pane" id="pane-projects">
+        <div class="pane-title">🛠 Projects</div>
+        <div id="proj-cards"></div>
+        <button class="btn-add" onclick="addProj()">+ Add Project</button>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="tab-pane" id="pane-quiz">
+        <div class="pane-title">🧠 Quiz</div>
+        <div id="quiz-cards"></div>
+        <button class="btn-add" onclick="addQuiz()">+ Add Quiz Entry</button>
+      </div>
+
+      <!-- WRITE -->
+      <div class="tab-pane" id="pane-write">
+        <div class="pane-title">✍ Write</div>
+        <div id="write-list-view">
+          <div id="write-cards"></div>
+          <button class="btn-add" onclick="addPost()">+ New Post</button>
+        </div>
+        <div id="write-editor-view" style="display:none">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
+            <button onclick="closeEditor()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.82rem;padding:0">← All Posts</button>
+            <span style="color:var(--border2)">|</span>
+            <span id="editor-label" style="font-size:0.82rem;color:var(--muted)">Untitled</span>
+          </div>
+          <div class="field-row">
+            <div class="field" style="grid-column:1/-1"><label>Title</label>
+              <input type="text" id="ep-title" placeholder="Post title…" oninput="editorUpdate('title',this.value)" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Subtitle</label>
+              <input type="text" id="ep-subtitle" placeholder="Optional subtitle or teaser…" oninput="editorUpdate('subtitle',this.value)" /></div>
+            <div class="field"><label>Date</label><input type="date" id="ep-date" oninput="editorUpdate('date',this.value)" /></div>
+          </div>
+          <div class="rte-wrap">
+            <div class="rte-toolbar">
+              <button class="rte-btn" onclick="fmt('bold')"><b>B</b></button>
+              <button class="rte-btn" onclick="fmt('italic')"><i>I</i></button>
+              <button class="rte-btn" onclick="fmt('underline')"><u>U</u></button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="fmtBlock('h1')">H1</button>
+              <button class="rte-btn" onclick="fmtBlock('h2')">H2</button>
+              <button class="rte-btn" onclick="fmtBlock('h3')">H3</button>
+              <button class="rte-btn" onclick="fmtBlock('p')">¶</button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="fmt('insertUnorderedList')">• List</button>
+              <button class="rte-btn" onclick="fmt('insertOrderedList')">1. List</button>
+              <button class="rte-btn" onclick="fmtBlock('blockquote')">" "</button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="insertLink()">🔗 Link</button>
+              <button class="rte-btn" onclick="insertImage()">🖼 Image</button>
+              <button class="rte-btn" onclick="insertEmbed()">▶ Embed</button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="fmt('removeFormat')">✕ fmt</button>
+            </div>
+            <div class="rte-editor" id="rte-editor" contenteditable="true"
+              oninput="editorContentChanged()" onpaste="handlePaste(event)"
+              placeholder="Start writing…"></div>
+          </div>
+          <div style="display:flex;gap:0.6rem;margin-top:0.75rem">
+            <button class="btn-add" style="margin:0;flex:1" onclick="closeEditor()">← Back to Posts</button>
+            <button class="btn-sm btn-del" onclick="deleteCurrentPost()">Delete Post</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="tab-pane" id="pane-contact">
+        <div class="pane-title">✉ Contact</div>
+        <div class="field"><label>Email</label><input type="text" id="f-c-email" oninput="DATA.contact.email=this.value;markDirty()" /></div>
+        <div class="field"><label>LinkedIn URL</label><input type="text" id="f-c-linkedin" oninput="DATA.contact.linkedin=this.value;markDirty()" /></div>
+        <div class="field"><label>Footer Note</label><input type="text" id="f-c-note" oninput="DATA.contact.note=this.value;markDirty()" /></div>
+      </div>
+
+      <!-- READING -->
+      <div class="tab-pane" id="pane-reading">
+        <div class="pane-title">📚 Goodreads</div>
+        <div class="info-box">
+          Connected to Goodreads user <strong>20847060</strong>. Fetched via RSS every hour, cached in the visitor's browser.<br><br>
+          Shelves: <strong>Currently Reading · Read · To Read · Did Not Finish</strong><br><br>
+          <a href="https://www.goodreads.com/user/show/20847060" target="_blank">View your Goodreads profile ↗</a>
+        </div>
+        <div class="field"><label>Goodreads User ID</label>
+          <input type="text" id="f-gr-id" value="20847060" oninput="if(!DATA.goodreads)DATA.goodreads={};DATA.goodreads.userId=this.value;markDirty()" />
+          <div class="field-hint">Numeric ID from your profile URL.</div></div>
+        <button class="btn-add" style="margin-top:0.5rem" onclick="localStorage.removeItem('gr_v4');localStorage.removeItem('gr_ts_v4');alert('Goodreads cache cleared.')">↺ Clear Cache</button>
+      </div>
+
+      <!-- WATCH -->
+      <div class="tab-pane" id="pane-watch">
+        <div class="pane-title">▶ Watch (YouTube)</div>
+        <div class="info-box">
+          Fetches your YouTube playlist via public RSS — no API key needed. Cached hourly in the visitor's browser.<br><br>
+          <strong>Playlist:</strong> <a href="https://youtube.com/playlist?list=PLMygqSN0pwQhRszMy8H88LIWV77S7Y0Zj" target="_blank">PLMygqSN0pwQhRszMy8H88LIWV77S7Y0Zj ↗</a>
+        </div>
+        <div class="field"><label>YouTube Playlist ID</label>
+          <input type="text" id="f-yt-id" value="PLMygqSN0pwQhRszMy8H88LIWV77S7Y0Zj" readonly />
+          <div class="field-hint">Edit <code style="font-family:var(--mono)">YT_PL</code> in index.html to change playlists.</div></div>
+        <button class="btn-add" style="margin-top:0.5rem" onclick="localStorage.removeItem('yt_v2');localStorage.removeItem('yt_ts_v2');alert('YouTube cache cleared.')">↺ Clear Cache</button>
+      </div>
+
+      <!-- WISHLIST -->
+      <div class="tab-pane" id="pane-wishlist">
+        <div class="pane-title">🎁 Wishlist Manager</div>
+        <div class="info-box">
+          Amazon does not expose a public wishlist API, so items are managed manually.<br><br>
+          <strong>Your wishlist:</strong> <a href="https://www.amazon.in/hz/wishlist/ls/2EK6LWMAFDIX" target="_blank">amazon.in/hz/wishlist ↗</a>
+        </div>
+        <div id="wish-cards"></div>
+        <button class="btn-add" onclick="addWish()">+ Add Item</button>
+      </div>
+
+      <!-- VISIBILITY -->
+      <div class="tab-pane" id="pane-visibility">
+        <div class="pane-title">👁 Section Visibility</div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.65">Toggle which sections appear on the public site. Hit <strong style="color:var(--text)">Publish</strong> to apply.</p>
+        <div class="toggle-grid" id="vis-toggles"></div>
+      </div>
+
+      <!-- SETUP -->
+      <div class="tab-pane" id="pane-setup">
+        <div class="pane-title">⚙ Setup &amp; Deploy</div>
+
+        <div class="info-box" id="env-check-box">Checking environment…</div>
+
+        <div class="deploy-box">
+          <div class="dl">How it works</div>
+          <p>
+            Every time you click <strong style="color:var(--text)">Publish</strong>, the admin panel calls a Netlify serverless function
+            (<code>/.netlify/functions/save</code>) which commits <code>content.json</code> to your GitHub repo via the GitHub API.
+            Netlify detects the commit and automatically rebuilds &amp; redeploys the site — usually within 30–60 seconds.
+          </p>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Required environment variables (set in Netlify → Site → Environment Variables)</div>
+          <table class="env-table">
+            <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>GITHUB_TOKEN</td><td>Personal Access Token with <code>repo</code> scope. Create at github.com → Settings → Developer settings → Personal access tokens</td></tr>
+              <tr><td>GITHUB_OWNER</td><td>Your GitHub username (e.g. <code>samridhkudesia</code>)</td></tr>
+              <tr><td>GITHUB_REPO</td><td>Repository name (e.g. <code>portfolio</code>)</td></tr>
+              <tr><td>GITHUB_BRANCH</td><td><code>main</code> (or your default branch)</td></tr>
+              <tr><td>ADMIN_SECRET</td><td>A long random string — keep this private. Paste it below too.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Admin Secret (stored in browser only)</div>
+          <p style="margin-bottom:0.8rem">This must match the <code>ADMIN_SECRET</code> environment variable on Netlify.</p>
+          <div class="field" style="margin:0">
+            <input type="password" id="f-admin-secret" placeholder="Paste your ADMIN_SECRET here…"
+              oninput="localStorage.setItem('admin_secret', this.value)" />
+            <div class="field-hint">Stored only in your browser's localStorage — never sent to GitHub directly.</div>
+          </div>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Change Admin Login Credentials</div>
+          <div class="field-row" style="margin-top:0.8rem">
+            <div class="field"><label>New Email</label><input type="email" id="new-email" /></div>
+            <div class="field"><label>New Password (min 8 chars)</label><input type="password" id="new-pass" /></div>
+          </div>
+          <button class="btn-add" style="margin-top:0" onclick="changeCreds()">Update &amp; Re-login</button>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Step-by-step first-time setup</div>
+          <p>
+            1. Push this repo to GitHub (<code>git init &amp;&amp; git add . &amp;&amp; git push</code>)<br>
+            2. Go to <a href="https://app.netlify.com" target="_blank" style="color:var(--accent)">app.netlify.com</a> → Add new site → Import from Git → select your repo<br>
+            3. Set all 5 environment variables above in Netlify → Site configuration → Environment variables<br>
+            4. Trigger a redeploy (Netlify → Deploys → Trigger deploy)<br>
+            5. Visit <code>yoursite.netlify.app/admin</code>, paste your <code>ADMIN_SECRET</code> above, and click <strong style="color:var(--text)">Publish</strong> to test
+          </p>
+        </div>
+
+        <div style="margin-top:1.5rem">
+          <div class="field"><label>Danger zone — Export current DATA as JSON</label>
+            <textarea id="export-display" readonly style="font-family:var(--mono);font-size:0.73rem;min-height:160px;opacity:.7"></textarea></div>
+          <div class="export-btns">
+            <button class="btn-exp btn-exp-copy" onclick="copyJson()">Copy JSON</button>
+            <button class="btn-exp btn-exp-dl" onclick="dlJson()">Download JSON</button>
+            <button class="btn-exp btn-exp-reset" onclick="resetAll()">Reset to Defaults</button>
+          </div>
+          <div style="margin-top:1.2rem">
+            <div class="field"><label>Import JSON</label>
+              <textarea id="import-in" style="font-family:var(--mono);font-size:0.73rem;min-height:80px" placeholder="Paste JSON here…"></textarea></div>
+            <button class="btn-add" onclick="importJson()" style="margin-top:0">Import &amp; Apply</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /admin-body -->
+</div><!-- /admin-app -->
+
+<script>
+// ═══════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════
+const AUTH_KEY='admin_creds', SESS_KEY='admin_session';
+function getCreds(){try{const r=localStorage.getItem(AUTH_KEY);if(r)return JSON.parse(r);}catch(_){}return{email:'samridh@gmail.com',password:'portfolio2024'};}
+function isLoggedIn(){return sessionStorage.getItem(SESS_KEY)==='1';}
+function doLogin(){
+  const c=getCreds(),em=document.getElementById('l-email').value.trim().toLowerCase(),pw=document.getElementById('l-pass').value;
+  if(em===c.email.toLowerCase()&&pw===c.password){sessionStorage.setItem(SESS_KEY,'1');document.getElementById('login-screen').classList.add('hidden');document.getElementById('admin-app').classList.add('visible');initAdmin();}
+  else{document.getElementById('l-err').classList.add('show');document.getElementById('l-pass').value='';}
+}
+function logout(){sessionStorage.removeItem(SESS_KEY);location.reload();}
+function changeCreds(){const em=document.getElementById('new-email').value.trim(),pw=document.getElementById('new-pass').value;if(!em||pw.length<8){alert('Valid email and password ≥8 chars required.');return;}localStorage.setItem(AUTH_KEY,JSON.stringify({email:em,password:pw}));alert('Updated — you will be signed out.');logout();}
+document.getElementById('l-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('l-pass').focus();});
+
+// ═══════════════════════════════════════
+//  DATA — loaded from content.json on the server
+// ═══════════════════════════════════════
+const DEFAULT_DATA={
+  hero:{name:"Samridh Kudesia",photo:"",tagline:"Product thinker building at the intersection of AI, education, and consumer tech.",links:{linkedin:"https://www.linkedin.com/in/samridhkudesia/",email:"samridh@gmail.com"}},
+  timeline:[
+    {id:"1",company:"Park+",role:"Product Manager",subtext:"Building India's mobility future, one parking spot at a time.",website:"https://parkplus.io",startDate:"2022",endDate:"Present",duration:"2+ yrs",bullets:["Led product strategy for India's largest parking & mobility super-app","Owned CRM and mobile app roadmap serving millions of urban users"]},
+    {id:"2",company:"Plaksha University",role:"Founders' Office — Program Lead",subtext:"Helping reimagine what a technology university could look like in India.",website:"https://plaksha.edu.in",startDate:"2021",endDate:"2022",duration:"~1 yr",bullets:["Worked in the Founders' Office helping build a next-generation tech university","Spearheaded launch of a quality AI/ML program for advanced tech education"]},
+    {id:"3",company:"Leap Finance",role:"Associate",subtext:"Making international education financially accessible for Indian students.",website:"https://leapfinance.com",startDate:"2020",endDate:"2021",duration:"~1 yr",bullets:["Contributed to fintech product and operations at a leading EdFintech startup"]},
+    {id:"4",company:"Kuar — Koç University Arçelik Research Center",role:"Research Intern",subtext:"Exploring the intersection of design, creativity, and human-computer interaction.",website:"https://kuar.ku.edu.tr",startDate:"2019",endDate:"2020",duration:"~1 yr",bullets:["Conducted research in creative industries and human-computer interaction"]}
+  ],
+  resume:{label:"Download Resume",url:"https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link"},
+  projects:[
+    {id:"1",title:"Park+ Mobility Super-App",description:"Led product for India's largest parking platform.",url:"https://parkplus.io",tags:["Product","Mobile","Mobility"]},
+    {id:"2",title:"Plaksha AI/ML Program",description:"Designed and launched a rigorous AI/ML curriculum at Plaksha University.",url:"https://plaksha.edu.in",tags:["Education","AI","Program Design"]}
+  ],
+  quiz:[],write:[],contact:{email:"samridh@gmail.com",linkedin:"https://www.linkedin.com/in/samridhkudesia/",note:"Open to interesting conversations about product, AI, and education."},
+  visibility:{experience:true,projects:true,quiz:true,write:true,reading:true,watch:true,wishlist:true,contact:true},
+  wishlistItems:[]
+};
+
+let DATA={};
+async function loadData(){
+  try{
+    const res=await fetch('/content.json?v='+Date.now());
+    if(res.ok){DATA=await res.json();}else throw new Error();
+  }catch(_){
+    // Local dev fallback: use localStorage draft or defaults
+    try{DATA=JSON.parse(localStorage.getItem('cms_draft')||'null')||clone(DEFAULT_DATA);}
+    catch(__){DATA=clone(DEFAULT_DATA);}
+    setSaveStatus('idle','Local mode (no content.json found)');
+  }
+  hydrate();
+}
+
+function hydrate(){
+  if(!DATA.visibility)DATA.visibility={...DEFAULT_DATA.visibility};
+  ['quiz','write','reading','watch','wishlist','contact','experience','projects'].forEach(k=>{if(DATA.visibility[k]===undefined)DATA.visibility[k]=true;});
+  if(!DATA.quiz)DATA.quiz=[];
+  if(!DATA.write)DATA.write=[];
+  if(!DATA.wishlistItems)DATA.wishlistItems=[];
+  if(!DATA.goodreads)DATA.goodreads={userId:'20847060'};
+  DATA.timeline.forEach(t=>{if(t.subtext===undefined)t.subtext='';});
+}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+
+// ═══════════════════════════════════════
+//  DIRTY TRACKING — changes accumulate in DATA
+//  and are pushed on Publish
+// ═══════════════════════════════════════
+let isDirty=false;
+function markDirty(){isDirty=true;setSaveStatus('idle','Unsaved changes — click Publish');}
+
+// ═══════════════════════════════════════
+//  PUBLISH — POST to serverless function
+// ═══════════════════════════════════════
+async function publishToGitHub(){
+  const secret=localStorage.getItem('admin_secret')||'';
+  if(!secret){alert('Paste your ADMIN_SECRET in the Setup tab before publishing.');showTab('setup',document.querySelector('.sb-btn:last-child'));return;}
+
+  setSaveStatus('saving','Publishing…');
+  document.getElementById('publish-btn').disabled=true;
+
+  // Always persist a local draft first (safe fallback)
+  localStorage.setItem('cms_draft',JSON.stringify(DATA));
+
+  try{
+    const res=await fetch('/.netlify/functions/save',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Secret':secret},
+      body:JSON.stringify({content:DATA})
+    });
+    const json=await res.json();
+    if(!res.ok)throw new Error(json.error||res.statusText);
+
+    isDirty=false;
+    setSaveStatus('saved','Published ✓ — redeploying…');
+    if(json.url){document.getElementById('deploy-status').innerHTML=`<a href="${json.url}" target="_blank">View commit ↗</a>`;}
+    // After ~60s the deploy should be done — reset status
+    setTimeout(()=>{if(!isDirty)setSaveStatus('idle','No unsaved changes');},65000);
+  }catch(err){
+    console.error(err);
+    setSaveStatus('error','Publish failed: '+err.message);
+  }finally{
+    document.getElementById('publish-btn').disabled=false;
+  }
+}
+
+function setSaveStatus(state,text){
+  const el=document.getElementById('save-status');
+  el.className=state; el.textContent=text;
+}
+
+// Check if we have a working function endpoint
+async function checkEnv(){
+  const box=document.getElementById('env-check-box');
+  const secret=localStorage.getItem('admin_secret')||'';
+  if(!secret){box.innerHTML='<strong>⚠ Not configured yet.</strong> Set your <code>ADMIN_SECRET</code> above and ensure all env vars are in Netlify. See the steps below.';return;}
+  try{
+    // Send an empty POST — the function will return 401 if the secret is wrong, 500 if env vars are missing
+    const res=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Secret':'__CHECK__'},body:JSON.stringify({content:{}})});
+    if(res.status===401){box.style.background='rgba(78,201,148,0.06)';box.style.borderColor='rgba(78,201,148,0.2)';box.innerHTML='<strong style="color:var(--green)">✓ Function reachable.</strong> GitHub env vars are configured. You can publish.';}
+    else if(res.status===500){const j=await res.json();box.innerHTML=`<strong>⚠ Function error:</strong> ${j.error} — check your Netlify env vars.`;}
+    else{box.innerHTML='Function responded with status '+res.status;}
+  }catch(e){
+    if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){
+      box.innerHTML='<strong>Local dev mode.</strong> The publish function only runs on Netlify. Changes are saved to localStorage and will sync when you deploy.';
+    }else{
+      box.innerHTML='<strong>⚠ Could not reach function:</strong> '+e.message;
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function showTab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='setup'){refreshExport();checkEnv();}
+}
+
+// ═══════════════════════════════════════
+//  PHOTO
+// ═══════════════════════════════════════
+function handlePhoto(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{DATA.hero.photo=ev.target.result;document.getElementById('f-photo-url').value='';updatePhotoPreview();markDirty();};r.readAsDataURL(f);}
+function clearPhoto(){DATA.hero.photo='';document.getElementById('f-photo-url').value='';updatePhotoPreview();markDirty();}
+function updatePhotoPreview(){const p=document.getElementById('photo-prev');if(DATA.hero.photo)p.innerHTML=`<img src="${DATA.hero.photo}"/>`;else p.textContent=DATA.hero.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+// ═══════════════════════════════════════
+//  TIMELINE
+// ═══════════════════════════════════════
+function renderTLCards(){
+  document.getElementById('tl-cards').innerHTML=DATA.timeline.map((item,i)=>`
+    <div class="item-card" data-tl="${i}">
+      <div class="ic-header"><div class="ic-title">${item.company||'New Role'}</div>
+        <div class="ic-actions">
+          ${i>0?`<button class="btn-sm btn-mv" onclick="moveTL(${i},-1)">↑</button>`:''}
+          ${i<DATA.timeline.length-1?`<button class="btn-sm btn-mv" onclick="moveTL(${i},1)">↓</button>`:''}
+          <button class="btn-sm btn-del" onclick="removeTL(${i})">Remove</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Company</label><input type="text" value="${esc(item.company)}" oninput="updateTL(${i},'company',this.value)"/></div>
+        <div class="field"><label>Role</label><input type="text" value="${esc(item.role)}" oninput="updateTL(${i},'role',this.value)"/></div>
+      </div>
+      <div class="field"><label>Subtext (italic)</label><input type="text" value="${esc(item.subtext)}" oninput="updateTL(${i},'subtext',this.value)" placeholder="One-line context…"/></div>
+      <div class="field"><label>Website</label><input type="text" value="${esc(item.website)}" oninput="updateTL(${i},'website',this.value)"/></div>
+      <div class="field-row">
+        <div class="field"><label>Start</label><input type="text" value="${esc(item.startDate)}" oninput="updateTL(${i},'startDate',this.value)" placeholder="Jan 2022"/></div>
+        <div class="field"><label>End</label><input type="text" value="${esc(item.endDate)}" oninput="updateTL(${i},'endDate',this.value)" placeholder="Present"/></div>
+        <div class="field"><label>Duration</label><input type="text" value="${esc(item.duration)}" oninput="updateTL(${i},'duration',this.value)" placeholder="~1 yr"/></div>
+      </div>
+      <div class="field"><label>Bullets (one per line)</label><textarea oninput="updateTLBullets(${i},this.value)">${item.bullets.join('\n')}</textarea></div>
+    </div>`).join('');
+}
+function updateTL(i,k,v){DATA.timeline[i][k]=v;document.querySelector(`[data-tl="${i}"] .ic-title`).textContent=DATA.timeline[i].company||'New Role';markDirty();}
+function updateTLBullets(i,v){DATA.timeline[i].bullets=v.split('\n').filter(l=>l.trim());markDirty();}
+function moveTL(i,d){[DATA.timeline[i],DATA.timeline[i+d]]=[DATA.timeline[i+d],DATA.timeline[i]];renderTLCards();markDirty();}
+function removeTL(i){if(!confirm('Remove?'))return;DATA.timeline.splice(i,1);renderTLCards();markDirty();}
+function addTL(){DATA.timeline.push({id:Date.now().toString(),company:'',role:'',subtext:'',website:'',startDate:'',endDate:'Present',duration:'',bullets:['']});renderTLCards();markDirty();}
+
+// ═══════════════════════════════════════
+//  PROJECTS
+// ═══════════════════════════════════════
+function renderProjCards(){
+  document.getElementById('proj-cards').innerHTML=DATA.projects.map((p,i)=>`
+    <div class="item-card" data-proj="${i}">
+      <div class="ic-header"><div class="ic-title">${p.title||'New Project'}</div>
+        <div class="ic-actions">
+          ${i>0?`<button class="btn-sm btn-mv" onclick="moveProj(${i},-1)">↑</button>`:''}
+          ${i<DATA.projects.length-1?`<button class="btn-sm btn-mv" onclick="moveProj(${i},1)">↓</button>`:''}
+          <button class="btn-sm btn-del" onclick="removeProj(${i})">Remove</button>
+        </div>
+      </div>
+      <div class="field"><label>Title</label><input type="text" value="${esc(p.title)}" oninput="updateProj(${i},'title',this.value)"/></div>
+      <div class="field"><label>Description</label><textarea oninput="updateProj(${i},'description',this.value)">${esc(p.description)}</textarea></div>
+      <div class="field"><label>URL</label><input type="text" value="${esc(p.url)}" oninput="updateProj(${i},'url',this.value)"/></div>
+      <div class="field"><label>Tags (comma-separated)</label><input type="text" value="${p.tags.join(', ')}" oninput="updateProjTags(${i},this.value)"/></div>
+    </div>`).join('');
+}
+function updateProj(i,k,v){DATA.projects[i][k]=v;document.querySelector(`[data-proj="${i}"] .ic-title`).textContent=DATA.projects[i].title||'New Project';markDirty();}
+function updateProjTags(i,v){DATA.projects[i].tags=v.split(',').map(t=>t.trim()).filter(Boolean);markDirty();}
+function moveProj(i,d){[DATA.projects[i],DATA.projects[i+d]]=[DATA.projects[i+d],DATA.projects[i]];renderProjCards();markDirty();}
+function removeProj(i){if(!confirm('Remove?'))return;DATA.projects.splice(i,1);renderProjCards();markDirty();}
+function addProj(){DATA.projects.push({id:Date.now().toString(),title:'',description:'',url:'',tags:[]});renderProjCards();markDirty();}
+
+// ═══════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════
+function renderQuizCards(){
+  document.getElementById('quiz-cards').innerHTML=(DATA.quiz||[]).map((q,i)=>`
+    <div class="item-card" data-quiz="${i}">
+      <div class="ic-header"><div class="ic-title">${q.title||'New Quiz'}</div>
+        <div class="ic-actions">
+          ${i>0?`<button class="btn-sm btn-mv" onclick="moveQuiz(${i},-1)">↑</button>`:''}
+          ${i<DATA.quiz.length-1?`<button class="btn-sm btn-mv" onclick="moveQuiz(${i},1)">↓</button>`:''}
+          <button class="btn-sm btn-del" onclick="removeQuiz(${i})">Remove</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Title</label><input type="text" value="${esc(q.title)}" oninput="updateQuiz(${i},'title',this.value)"/></div>
+        <div class="field"><label>Date</label><input type="date" value="${esc(q.date||'')}" oninput="updateQuiz(${i},'date',this.value)"/></div>
+      </div>
+      <div class="field"><label>Link (URL)</label><input type="text" value="${esc(q.link||'')}" oninput="updateQuiz(${i},'link',this.value)" placeholder="https://…"/></div>
+      <div class="field"><label>Image URL</label><input type="text" value="${esc(q.image||'')}" oninput="updateQuiz(${i},'image',this.value)" placeholder="https://…"/></div>
+      <div class="field"><label>Blurb</label><textarea oninput="updateQuiz(${i},'blurb',this.value)" style="min-height:60px">${esc(q.blurb||'')}</textarea></div>
+    </div>`).join('');
+}
+function updateQuiz(i,k,v){DATA.quiz[i][k]=v;document.querySelector(`[data-quiz="${i}"] .ic-title`).textContent=DATA.quiz[i].title||'New Quiz';markDirty();}
+function moveQuiz(i,d){[DATA.quiz[i],DATA.quiz[i+d]]=[DATA.quiz[i+d],DATA.quiz[i]];renderQuizCards();markDirty();}
+function removeQuiz(i){if(!confirm('Remove?'))return;DATA.quiz.splice(i,1);renderQuizCards();markDirty();}
+function addQuiz(){if(!DATA.quiz)DATA.quiz=[];DATA.quiz.push({id:Date.now().toString(),title:'',link:'',image:'',blurb:'',date:new Date().toISOString().slice(0,10)});renderQuizCards();markDirty();}
+
+// ═══════════════════════════════════════
+//  WRITE / BLOG EDITOR
+// ═══════════════════════════════════════
+let currentPostId=null;
+function renderWriteCards(){
+  const posts=(DATA.write||[]).slice().sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  document.getElementById('write-cards').innerHTML=posts.length
+    ?posts.map(p=>{
+        const ds=p.date?new Date(p.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'No date';
+        return `<div class="item-card" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem" onclick="openEditor('${p.id}')">
+          <div>
+            <div style="font-size:0.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">${ds}</div>
+            <div style="font-size:0.92rem;font-weight:600">${p.title||'Untitled'}</div>
+            ${p.subtitle?`<div style="font-size:0.8rem;color:var(--muted);margin-top:.1rem">${p.subtitle}</div>`:''}
+          </div>
+          <span style="color:var(--muted)">→</span>
+        </div>`;
+      }).join('')
+    :'<p style="font-size:0.85rem;color:var(--muted);font-style:italic;padding:.5rem 0">No posts yet.</p>';
+}
+function openEditor(id){
+  const post=(DATA.write||[]).find(p=>p.id===id);if(!post)return;
+  currentPostId=id;
+  document.getElementById('write-list-view').style.display='none';
+  document.getElementById('write-editor-view').style.display='block';
+  document.getElementById('ep-title').value=post.title||'';
+  document.getElementById('ep-subtitle').value=post.subtitle||'';
+  document.getElementById('ep-date').value=post.date||'';
+  document.getElementById('rte-editor').innerHTML=post.content||'';
+  document.getElementById('editor-label').textContent=post.title||'Untitled';
+}
+function closeEditor(){currentPostId=null;document.getElementById('write-editor-view').style.display='none';document.getElementById('write-list-view').style.display='block';renderWriteCards();}
+function addPost(){if(!DATA.write)DATA.write=[];const id=Date.now().toString();DATA.write.push({id,title:'',subtitle:'',date:new Date().toISOString().slice(0,10),content:''});markDirty();openEditor(id);}
+function deleteCurrentPost(){if(!currentPostId)return;if(!confirm('Delete post?'))return;DATA.write=(DATA.write||[]).filter(p=>p.id!==currentPostId);markDirty();closeEditor();}
+function editorUpdate(k,v){const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;post[k]=v;if(k==='title')document.getElementById('editor-label').textContent=v||'Untitled';markDirty();}
+function editorContentChanged(){const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;post.content=document.getElementById('rte-editor').innerHTML;markDirty();}
+
+// RTE commands
+function fmt(cmd){document.getElementById('rte-editor').focus();document.execCommand(cmd,false,null);editorContentChanged();}
+function fmtBlock(tag){document.getElementById('rte-editor').focus();document.execCommand('formatBlock',false,tag);editorContentChanged();}
+function insertLink(){const url=prompt('URL:');if(!url)return;document.getElementById('rte-editor').focus();document.execCommand('createLink',false,url);editorContentChanged();}
+function insertImage(){const url=prompt('Image URL:');if(!url)return;document.getElementById('rte-editor').focus();document.execCommand('insertHTML',false,`<img src="${url}" style="max-width:100%;border-radius:6px;margin:0.5rem 0;display:block"/>`);editorContentChanged();}
+function insertEmbed(){
+  const input=prompt('Paste a YouTube/Vimeo URL or raw <iframe> embed:');if(!input)return;
+  document.getElementById('rte-editor').focus();
+  let html='';
+  const ytM=input.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  const vmM=input.match(/vimeo\.com\/(\d+)/);
+  if(ytM)html=`<iframe src="https://www.youtube.com/embed/${ytM[1]}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="width:100%;aspect-ratio:16/9;border:none;border-radius:6px;display:block;margin:0.5rem 0"></iframe>`;
+  else if(vmM)html=`<iframe src="https://player.vimeo.com/video/${vmM[1]}" allow="autoplay;fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;border:none;border-radius:6px;display:block;margin:0.5rem 0"></iframe>`;
+  else if(input.trim().startsWith('<'))html=input.trim();
+  else{alert('Paste a YouTube/Vimeo URL or a raw <iframe> tag.');return;}
+  document.execCommand('insertHTML',false,html);editorContentChanged();
+}
+function handlePaste(e){const t=e.clipboardData.getData('text/plain');if(t){e.preventDefault();document.execCommand('insertText',false,t);editorContentChanged();}}
+
+// ═══════════════════════════════════════
+//  WISHLIST
+// ═══════════════════════════════════════
+function renderWishCards(){
+  document.getElementById('wish-cards').innerHTML=(DATA.wishlistItems||[]).map((w,i)=>`
+    <div class="item-card" data-wish="${i}">
+      <div class="ic-header"><div class="ic-title">${w.title||'New Item'}</div>
+        <div class="ic-actions"><button class="btn-sm btn-del" onclick="removeWish(${i})">Remove</button></div>
+      </div>
+      <div class="field"><label>Title</label><input type="text" value="${esc(w.title)}" oninput="updateWish(${i},'title',this.value)"/></div>
+      <div class="field-row">
+        <div class="field"><label>Price</label><input type="text" value="${esc(w.price||'')}" oninput="updateWish(${i},'price',this.value)"/></div>
+        <div class="field"><label>Priority</label>
+          <select onchange="updateWish(${i},'priority',this.value)">
+            <option value="" ${!w.priority?'selected':''}>None</option>
+            <option value="High" ${w.priority==='High'?'selected':''}>High</option>
+            <option value="Medium" ${w.priority==='Medium'?'selected':''}>Medium</option>
+            <option value="Low" ${w.priority==='Low'?'selected':''}>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Amazon URL</label><input type="text" value="${esc(w.url||'')}" oninput="updateWish(${i},'url',this.value)"/></div>
+      <div class="field"><label>Image URL</label><input type="text" value="${esc(w.image||'')}" oninput="updateWish(${i},'image',this.value)"/></div>
+    </div>`).join('');
+}
+function updateWish(i,k,v){DATA.wishlistItems[i][k]=v;document.querySelector(`[data-wish="${i}"] .ic-title`).textContent=DATA.wishlistItems[i].title||'New Item';markDirty();}
+function removeWish(i){DATA.wishlistItems.splice(i,1);renderWishCards();markDirty();}
+function addWish(){if(!DATA.wishlistItems)DATA.wishlistItems=[];DATA.wishlistItems.push({title:'',price:'',url:'',image:'',priority:''});renderWishCards();markDirty();}
+
+// ═══════════════════════════════════════
+//  VISIBILITY
+// ═══════════════════════════════════════
+const SECTIONS=[
+  {id:'experience',name:'Professional Timeline',desc:'Work history and career milestones'},
+  {id:'projects',name:'Projects',desc:'Selected work and side projects'},
+  {id:'quiz',name:'Quiz',desc:'Quiz entries with links'},
+  {id:'write',name:'Write',desc:'Blog posts and essays'},
+  {id:'reading',name:'Reading',desc:'Goodreads shelves'},
+  {id:'watch',name:'Watch',desc:'YouTube playlist'},
+  {id:'wishlist',name:'Wishlist',desc:'Amazon wishlist items'},
+  {id:'contact',name:'Contact',desc:'Email and social links'},
+];
+function renderVisibility(){
+  const vis=DATA.visibility||{};
+  document.getElementById('vis-toggles').innerHTML=SECTIONS.map(s=>`
+    <div class="toggle-row">
+      <div><div class="toggle-name">${s.name}</div><div class="toggle-desc">${s.desc}</div></div>
+      <label class="toggle-sw">
+        <input type="checkbox" ${vis[s.id]!==false?'checked':''} onchange="toggleSec('${s.id}',this.checked)"/>
+        <span class="toggle-track"></span>
+      </label>
+    </div>`).join('');
+}
+function toggleSec(id,show){if(!DATA.visibility)DATA.visibility={};DATA.visibility[id]=show;markDirty();}
+
+// ═══════════════════════════════════════
+//  EXPORT / IMPORT
+// ═══════════════════════════════════════
+function refreshExport(){const p=clone(DATA);if(p.hero?.photo?.startsWith('data:'))p.hero.photo='[base64 photo]';document.getElementById('export-display').value=JSON.stringify(p,null,2);}
+function copyJson(){navigator.clipboard.writeText(JSON.stringify(DATA,null,2)).then(()=>setSaveStatus('saved','Copied to clipboard'));}
+function dlJson(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(DATA,null,2));a.download='content.json';a.click();}
+function importJson(){try{DATA=JSON.parse(document.getElementById('import-in').value);hydrate();initAdmin();document.getElementById('import-in').value='';markDirty();}catch(e){alert('Invalid JSON: '+e.message);}}
+function resetAll(){if(!confirm('Reset ALL content to defaults?'))return;DATA=clone(DEFAULT_DATA);initAdmin();markDirty();}
+
+// ═══════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+function initAdmin(){
+  document.getElementById('f-name').value       =DATA.hero.name;
+  document.getElementById('f-tagline').value    =DATA.hero.tagline;
+  document.getElementById('f-email').value      =DATA.hero.links.email;
+  document.getElementById('f-linkedin').value   =DATA.hero.links.linkedin;
+  document.getElementById('f-photo-url').value  =DATA.hero.photo?.startsWith('data:')?'':(DATA.hero.photo||'');
+  document.getElementById('f-resume-label').value=DATA.resume.label;
+  document.getElementById('f-resume-url').value  =DATA.resume.url;
+  document.getElementById('f-c-email').value    =DATA.contact.email;
+  document.getElementById('f-c-linkedin').value =DATA.contact.linkedin;
+  document.getElementById('f-c-note').value     =DATA.contact.note;
+  document.getElementById('f-gr-id').value      =DATA.goodreads?.userId||'20847060';
+  document.getElementById('f-admin-secret').value=localStorage.getItem('admin_secret')||'';
+  updatePhotoPreview();
+  renderTLCards();
+  renderProjCards();
+  renderQuizCards();
+  renderWriteCards();
+  renderWishCards();
+  renderVisibility();
+  setSaveStatus('idle','No unsaved changes');
+}
+
+// Boot
+if(isLoggedIn()){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('admin-app').classList.add('visible');
+  loadData().then(initAdmin);
+}
+</script>
+</body>
+</html>
