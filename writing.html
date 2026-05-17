@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Title and meta tags are set dynamically after the post loads -->
+  <title>Loading… — Samridh Kudesia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0f0e0d; --sand: #f5f0e8; --warm: #e8dfd0;
+      --accent: #c8520a; --muted: #7a7068; --rule: #d4cbc0;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans:  'DM Sans', system-ui, sans-serif;
+      --nav-h: 56px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--sand); color: var(--ink); font-size: 16px; line-height: 1.65; min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h);
+      background: rgba(245,240,232,0.92); backdrop-filter: blur(10px);
+      z-index: 100; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; border-bottom: 1px solid var(--rule);
+    }
+    .nav-name { font-family: var(--serif); font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+    .back-link { font-size: 0.82rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .back-link:hover { color: var(--accent); }
+
+    /* LAYOUT */
+    main { padding-top: var(--nav-h); }
+    article { max-width: 680px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+
+    /* LOADING / ERROR STATE */
+    .state-wrap {
+      max-width: 680px; margin: 0 auto;
+      padding: 6rem 2rem; text-align: center;
+    }
+    .state-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .state-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .state-msg { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+    .state-link { color: var(--accent); text-decoration: none; }
+    .state-link:hover { text-decoration: underline; }
+
+    /* Skeleton shimmer while loading */
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skeleton {
+      background: linear-gradient(90deg, var(--warm) 25%, var(--rule) 50%, var(--warm) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    .sk-label  { height: 12px; width: 80px; margin-bottom: 1.2rem; }
+    .sk-h1-a   { height: 44px; width: 90%; margin-bottom: 0.6rem; }
+    .sk-h1-b   { height: 44px; width: 70%; margin-bottom: 1.8rem; }
+    .sk-sub    { height: 18px; width: 60%; margin-bottom: 2.5rem; }
+    .sk-rule   { height: 1px; background: var(--rule); margin-bottom: 2.5rem; }
+    .sk-p      { height: 14px; margin-bottom: 0.75rem; }
+    .sk-p-short { width: 65%; }
+
+    /* POST HEADER */
+    header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--rule); }
+    .post-date {
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.75rem; display: block;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 5vw, 2.9rem);
+      font-weight: 700; line-height: 1.1; margin-bottom: 0.6rem;
+    }
+    .subtitle { font-size: 1.05rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+    /* PROSE */
+    .prose { font-size: 1.05rem; line-height: 1.82; color: var(--ink); }
+    .prose h1, .prose h2 { font-family: var(--serif); font-weight: 700; line-height: 1.2; margin: 2.2rem 0 0.75rem; }
+    .prose h1 { font-size: 1.75rem; }
+    .prose h2 { font-size: 1.35rem; }
+    .prose h3 { font-size: 1.08rem; font-weight: 600; margin: 1.8rem 0 0.5rem; }
+    .prose p  { margin: 0 0 1.25rem; }
+    .prose ul, .prose ol { padding-left: 1.4rem; margin-bottom: 1.25rem; }
+    .prose li { margin-bottom: 0.35rem; }
+    .prose a  { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .prose a:hover { text-decoration: none; }
+    .prose img { max-width: 100%; border-radius: 8px; display: block; margin: 2rem auto; box-shadow: 0 4px 24px rgba(0,0,0,.1); }
+    .prose iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 8px; display: block; margin: 2rem 0; }
+    .prose blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 0 0.6rem 1.4rem; margin: 1.8rem 0; color: var(--muted); font-style: italic; font-size: 1.08rem; }
+    .prose hr { border: none; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+    .prose pre { background: var(--warm); border-radius: 8px; padding: 1.1rem 1.3rem; overflow-x: auto; font-size: 0.875rem; line-height: 1.6; margin: 1.5rem 0; }
+    .prose code { background: var(--warm); padding: 2px 6px; border-radius: 4px; font-size: 0.88em; }
+    .prose pre code { background: none; padding: 0; }
+
+    /* POST FOOTER */
+    .post-footer {
+      margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .post-footer a { font-size: 0.85rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .post-footer a:hover { color: var(--accent); }
+    .post-footer-name { font-family: var(--serif); font-size: 0.9rem; color: var(--muted); }
+
+    footer { text-align: center; padding: 1.5rem; font-size: 0.75rem; color: rgba(15,14,13,.3); letter-spacing: 0.04em; }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 1rem; }
+      article { padding: 3rem 1.2rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-name" id="nav-name">Samridh Kudesia</a>
+  <a href="/#write" class="back-link">← All writing</a>
+</nav>
+
+<main id="main">
+  <!-- Skeleton loading state -->
+  <article id="skeleton-state">
+    <div class="skeleton sk-label"></div>
+    <div class="skeleton sk-h1-a"></div>
+    <div class="skeleton sk-h1-b"></div>
+    <div class="skeleton sk-sub"></div>
+    <div class="sk-rule"></div>
+    <div class="skeleton sk-p" style="width:100%"></div>
+    <div class="skeleton sk-p" style="width:88%"></div>
+    <div class="skeleton sk-p" style="width:95%"></div>
+    <div class="skeleton sk-p sk-p-short"></div>
+    <div class="skeleton sk-p" style="width:92%;margin-top:1.5rem"></div>
+    <div class="skeleton sk-p" style="width:80%"></div>
+    <div class="skeleton sk-p" style="width:97%"></div>
+  </article>
+</main>
+
+<footer id="footer" style="display:none">
+  <span id="footer-name">Samridh Kudesia</span> · Built with care
+</footer>
+
+<script>
+// ── Supabase config (replace placeholders after creating your project) ──────────
+const SB_URL  = '%%SUPABASE_URL%%';
+const SB_ANON = '%%SUPABASE_ANON_KEY%%';
+
+async function sbGet(table, filter = '') {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}${filter}`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` },
+  });
+  if (!res.ok) throw new Error(`Supabase ${table}: ${res.status}`);
+  return res.json();
+}
+
+// ── Parse slug from current URL ─────────────────────────────────────────────────
+// URL pattern:  /writing/my-post-slug
+function getSlug() {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  // parts[0] = 'writing', parts[1] = slug
+  return parts[1] || '';
+}
+
+// ── Set meta tags dynamically for social sharing ─────────────────────────────────
+function setMeta(post, siteName) {
+  document.title = `${post.title || 'Untitled'} — ${siteName}`;
+
+  const setOrCreate = (sel, attr, val) => {
+    let el = document.querySelector(sel);
+    if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
+    el.setAttribute(attr, val);
+  };
+
+  const desc = post.subtitle || post.title || '';
+  const url  = window.location.href;
+
+  setOrCreate('meta[name="description"]',          'content', desc);
+  setOrCreate('meta[property="og:title"]',         'content', post.title || 'Untitled');
+  setOrCreate('meta[property="og:description"]',   'content', desc);
+  setOrCreate('meta[property="og:url"]',           'content', url);
+  setOrCreate('meta[property="og:type"]',          'content', 'article');
+  setOrCreate('meta[property="og:site_name"]',     'content', siteName);
+  setOrCreate('meta[name="twitter:card"]',         'content', 'summary');
+  setOrCreate('meta[name="twitter:title"]',        'content', post.title || 'Untitled');
+  setOrCreate('meta[name="twitter:description"]',  'content', desc);
+
+  // Canonical link
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+  canonical.href = url;
+}
+
+// ── Render the post ──────────────────────────────────────────────────────────────
+function renderPost(post, siteName) {
+  const dateStr = post.date
+    ? new Date(post.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : '';
+
+  document.getElementById('main').innerHTML = `
+    <article>
+      <header>
+        ${dateStr ? `<span class="post-date">${dateStr}</span>` : ''}
+        <h1>${post.title || 'Untitled'}</h1>
+        ${post.subtitle ? `<p class="subtitle">${post.subtitle}</p>` : ''}
+      </header>
+      <div class="prose">${post.content || ''}</div>
+      <div class="post-footer">
+        <a href="/#write">← All writing</a>
+        <span class="post-footer-name">${siteName}</span>
+      </div>
+    </article>`;
+
+  document.getElementById('footer').style.display = '';
+  document.getElementById('footer-name').textContent = siteName;
+}
+
+// ── Show error state ─────────────────────────────────────────────────────────────
+function showError(title, msg) {
+  document.getElementById('main').innerHTML = `
+    <div class="state-wrap">
+      <div class="state-icon">✦</div>
+      <div class="state-title">${title}</div>
+      <p class="state-msg">${msg}</p>
+      <p style="margin-top:1.5rem">
+        <a href="/#write" class="state-link">← Back to all writing</a>
+      </p>
+    </div>`;
+  document.getElementById('footer').style.display = '';
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────────
+async function boot() {
+  const slug = getSlug();
+
+  if (!slug) {
+    window.location.href = '/#write';
+    return;
+  }
+
+  // Check Supabase is configured
+  if (!SB_URL || SB_URL.includes('%%')) {
+    showError('Not configured', 'Supabase credentials are not set in writing.html. See the Setup tab in the admin panel.');
+    return;
+  }
+
+  try {
+    // Fetch site name and the specific post in parallel
+    const [cfgRows, postRows] = await Promise.all([
+      sbGet('site_config', '?id=eq.main&select=hero'),
+      sbGet('posts', `?slug=eq.${encodeURIComponent(slug)}&limit=1`),
+    ]);
+
+    const siteName = cfgRows[0]?.hero?.name || 'Samridh Kudesia';
+    document.getElementById('nav-name').textContent = siteName;
+
+    if (!postRows.length) {
+      document.title = 'Post not found — ' + siteName;
+      showError('Post not found', `No post exists at <code style="font-family:monospace">/writing/${slug}</code>. It may have been moved or deleted.`);
+      return;
+    }
+
+    const post = postRows[0];
+    setMeta(post, siteName);
+    renderPost(post, siteName);
+
+  } catch (err) {
+    console.error('writing.html error:', err);
+    showError('Could not load post', 'There was a problem fetching this post. Please try again in a moment.');
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

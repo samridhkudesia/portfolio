@@ -191,7 +191,7 @@
     <div class="tb-right">
       <span id="deploy-status"></span>
       <span id="save-status" class="idle">No unsaved changes</span>
-      <button id="publish-btn" onclick="publishToGitHub()" style="background:var(--accent);color:#fff;border:none;border-radius:99px;padding:5px 16px;font-size:0.78rem;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap" onmouseover="this.style.background='#a8420a'" onmouseout="this.style.background='var(--accent)'">↑ Publish</button>
+      <button id="publish-btn" onclick="publish()" style="background:var(--accent);color:#fff;border:none;border-radius:99px;padding:5px 16px;font-size:0.78rem;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap" onmouseover="this.style.background='#a8420a'" onmouseout="this.style.background='var(--accent)'">↑ Publish</button>
       <a href="/" target="_blank" class="view-btn">View Site ↗</a>
       <button class="logout-btn" onclick="logout()">Sign out</button>
     </div>
@@ -276,6 +276,8 @@
             <button onclick="closeEditor()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.82rem;padding:0">← All Posts</button>
             <span style="color:var(--border2)">|</span>
             <span id="editor-label" style="font-size:0.82rem;color:var(--muted)">Untitled</span>
+            <span style="flex:1"></span>
+            <a id="editor-post-url" href="#" target="_blank" style="font-size:0.72rem;color:var(--accent);text-decoration:none;opacity:0;pointer-events:none;font-family:var(--mono);transition:opacity .2s">—</a>
           </div>
           <div class="field-row">
             <div class="field" style="grid-column:1/-1"><label>Title</label>
@@ -374,40 +376,66 @@
       <!-- SETUP -->
       <div class="tab-pane" id="pane-setup">
         <div class="pane-title">⚙ Setup &amp; Deploy</div>
-
         <div class="info-box" id="env-check-box">Checking environment…</div>
 
         <div class="deploy-box">
           <div class="dl">How it works</div>
-          <p>
-            Every time you click <strong style="color:var(--text)">Publish</strong>, the admin panel calls a Netlify serverless function
-            (<code>/.netlify/functions/save</code>) which commits <code>content.json</code> to your GitHub repo via the GitHub API.
-            Netlify detects the commit and automatically rebuilds &amp; redeploys the site — usually within 30–60 seconds.
+          <p>All content lives in <strong style="color:var(--text)">Supabase</strong> — it survives redeploys forever.
+          Clicking <strong style="color:var(--text)">Publish</strong> calls a Netlify function which writes every table to Supabase instantly.
+          The public site and all blog post pages fetch directly from Supabase on every load —
+          <strong style="color:var(--text)">no redeployment needed for any content change.</strong></p>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Step 1 — Supabase credentials (browser only)</div>
+          <p style="margin-bottom:0.8rem">
+            Get these from <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--accent)">supabase.com/dashboard</a>
+            → your project → Settings → API.
+          </p>
+          <div class="field">
+            <label>Supabase Project URL</label>
+            <input type="text" id="f-sb-url" placeholder="https://xxxx.supabase.co" oninput="localStorage.setItem('sb_url',this.value.trim())" />
+            <div class="field-hint">e.g. <code style="font-family:var(--mono)">https://abcdefghijklm.supabase.co</code></div>
+          </div>
+          <div class="field">
+            <label>Supabase Anon Key (public — safe to expose)</label>
+            <input type="text" id="f-sb-anon" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…" oninput="localStorage.setItem('sb_anon',this.value.trim())" />
+          </div>
+          <button class="btn-add" style="margin-top:0" onclick="testSupabase()">Test Supabase Connection</button>
+          <div id="sb-test-result" style="font-size:0.78rem;margin-top:0.6rem;color:var(--muted)"></div>
+          <p style="font-size:0.75rem;color:var(--muted2);margin-top:0.8rem;line-height:1.6">
+            Also paste these values into <code style="font-family:var(--mono)">index.html</code> where it says
+            <code style="font-family:var(--mono)">%%SUPABASE_URL%%</code> and <code style="font-family:var(--mono)">%%SUPABASE_ANON_KEY%%</code>,
+            then <code>git commit &amp;&amp; git push</code> so the public site reads from Supabase too.
           </p>
         </div>
 
         <div class="deploy-box" style="margin-top:1rem">
-          <div class="dl">Required environment variables (set in Netlify → Site → Environment Variables)</div>
+          <div class="dl">Step 2 — Netlify environment variables</div>
           <table class="env-table">
             <thead><tr><th>Variable</th><th>Value</th></tr></thead>
             <tbody>
-              <tr><td>GITHUB_TOKEN</td><td>Personal Access Token with <code>repo</code> scope. Create at github.com → Settings → Developer settings → Personal access tokens</td></tr>
-              <tr><td>GITHUB_OWNER</td><td>Your GitHub username (e.g. <code>samridhkudesia</code>)</td></tr>
-              <tr><td>GITHUB_REPO</td><td>Repository name (e.g. <code>portfolio</code>)</td></tr>
-              <tr><td>GITHUB_BRANCH</td><td><code>main</code> (or your default branch)</td></tr>
-              <tr><td>ADMIN_SECRET</td><td>A long random string — keep this private. Paste it below too.</td></tr>
+              <tr><td>SUPABASE_URL</td><td>Same project URL as above</td></tr>
+              <tr><td>SUPABASE_SERVICE_KEY</td><td>Supabase → Settings → API → <strong>service_role</strong> secret (keep private)</td></tr>
+              <tr><td>ADMIN_SECRET</td><td>Any strong secret you invent — paste it below too</td></tr>
             </tbody>
           </table>
         </div>
 
         <div class="deploy-box" style="margin-top:1rem">
-          <div class="dl">Admin Secret (stored in browser only)</div>
-          <p style="margin-bottom:0.8rem">This must match the <code>ADMIN_SECRET</code> environment variable on Netlify.</p>
-          <div class="field" style="margin:0">
+          <div class="dl">Step 3 — Admin Secret</div>
+          <div class="field" style="margin:0.8rem 0 0">
             <input type="password" id="f-admin-secret" placeholder="Paste your ADMIN_SECRET here…"
               oninput="localStorage.setItem('admin_secret', this.value)" />
-            <div class="field-hint">Stored only in your browser's localStorage — never sent to GitHub directly.</div>
+            <div class="field-hint">Must match the <code style="font-family:var(--mono)">ADMIN_SECRET</code> Netlify env var. Stored only in your browser.</div>
           </div>
+        </div>
+
+        <div class="deploy-box" style="margin-top:1rem">
+          <div class="dl">Step 4 — Run the SQL schema</div>
+          <p>Go to <strong style="color:var(--text)">Supabase → SQL Editor → New query</strong>,
+          paste the contents of <code style="font-family:var(--mono)">supabase-schema.sql</code> from your repo, and click Run.
+          This creates all tables, seeds default data, and sets RLS policies.</p>
         </div>
 
         <div class="deploy-box" style="margin-top:1rem">
@@ -419,19 +447,8 @@
           <button class="btn-add" style="margin-top:0" onclick="changeCreds()">Update &amp; Re-login</button>
         </div>
 
-        <div class="deploy-box" style="margin-top:1rem">
-          <div class="dl">Step-by-step first-time setup</div>
-          <p>
-            1. Push this repo to GitHub (<code>git init &amp;&amp; git add . &amp;&amp; git push</code>)<br>
-            2. Go to <a href="https://app.netlify.com" target="_blank" style="color:var(--accent)">app.netlify.com</a> → Add new site → Import from Git → select your repo<br>
-            3. Set all 5 environment variables above in Netlify → Site configuration → Environment variables<br>
-            4. Trigger a redeploy (Netlify → Deploys → Trigger deploy)<br>
-            5. Visit <code>yoursite.netlify.app/admin</code>, paste your <code>ADMIN_SECRET</code> above, and click <strong style="color:var(--text)">Publish</strong> to test
-          </p>
-        </div>
-
         <div style="margin-top:1.5rem">
-          <div class="field"><label>Danger zone — Export current DATA as JSON</label>
+          <div class="field"><label>Export DATA as JSON (backup / migration)</label>
             <textarea id="export-display" readonly style="font-family:var(--mono);font-size:0.73rem;min-height:160px;opacity:.7"></textarea></div>
           <div class="export-btns">
             <button class="btn-exp btn-exp-copy" onclick="copyJson()">Copy JSON</button>
@@ -489,14 +506,97 @@ const DEFAULT_DATA={
 
 let DATA={};
 async function loadData(){
-  try{
-    const res=await fetch('/content.json?v='+Date.now());
-    if(res.ok){DATA=await res.json();}else throw new Error();
-  }catch(_){
-    // Local dev fallback: use localStorage draft or defaults
-    try{DATA=JSON.parse(localStorage.getItem('cms_draft')||'null')||clone(DEFAULT_DATA);}
-    catch(__){DATA=clone(DEFAULT_DATA);}
-    setSaveStatus('idle','Local mode (no content.json found)');
+  // Read Supabase credentials from localStorage (set in Setup tab)
+  const sbUrl  = localStorage.getItem('sb_url')  || '';
+  const sbAnon = localStorage.getItem('sb_anon') || '';
+
+  if (!sbUrl || !sbAnon) {
+    // Not configured yet — fall back to local draft or defaults
+    try { DATA = JSON.parse(localStorage.getItem('cms_draft')||'null') || clone(DEFAULT_DATA); }
+    catch(_) { DATA = clone(DEFAULT_DATA); }
+    setSaveStatus('idle', 'Supabase not configured — using local draft. See Setup tab.');
+    return;
+  }
+
+  setSaveStatus('saving', 'Loading from Supabase…');
+
+  async function sbGet(table, order='') {
+    const qs  = order ? `?order=${order}` : '';
+    const res = await fetch(`${sbUrl}/rest/v1/${table}${qs}`, {
+      headers: { apikey: sbAnon, Authorization: `Bearer ${sbAnon}` },
+    });
+    if (!res.ok) throw new Error(`Supabase ${table}: ${res.status} ${await res.text()}`);
+    return res.json();
+  }
+
+  try {
+    const [cfg, timeline, projects, quiz, posts, wishlist] = await Promise.all([
+      sbGet('site_config'),
+      sbGet('timeline',      'position'),
+      sbGet('projects',      'position'),
+      sbGet('quiz',          'position'),
+      sbGet('posts',         'updated_at.desc'),
+      sbGet('wishlist_items','position'),
+    ]);
+
+    const c = cfg[0] || {};
+    DATA = {
+      hero:       c.hero       || clone(DEFAULT_DATA.hero),
+      resume:     c.resume     || clone(DEFAULT_DATA.resume),
+      contact:    c.contact    || clone(DEFAULT_DATA.contact),
+      visibility: c.visibility || clone(DEFAULT_DATA.visibility),
+      goodreads:  { userId: '20847060' },
+      timeline: timeline.map(t => ({
+        id:        t.id,
+        company:   t.company   || '',
+        role:      t.role      || '',
+        subtext:   t.subtext   || '',
+        website:   t.website   || '',
+        startDate: t.start_date|| '',
+        endDate:   t.end_date  || '',
+        duration:  t.duration  || '',
+        bullets:   t.bullets   || [],
+      })),
+      projects: projects.map(p => ({
+        id:          p.id,
+        title:       p.title       || '',
+        description: p.description || '',
+        url:         p.url         || '',
+        tags:        p.tags        || [],
+      })),
+      quiz: quiz.map(q => ({
+        id:    q.id,
+        title: q.title || '',
+        link:  q.link  || '',
+        image: q.image || '',
+        blurb: q.blurb || '',
+        date:  q.date  || '',
+      })),
+      write: posts.map(p => ({
+        id:       p.id,
+        title:    p.title    || '',
+        subtitle: p.subtitle || '',
+        slug:     p.slug     || '',
+        date:     p.date     || '',
+        content:  p.content  || '',
+      })),
+      wishlistItems: wishlist.map(w => ({
+        id:       w.id,
+        title:    w.title    || '',
+        price:    w.price    || '',
+        url:      w.url      || '',
+        image:    w.image    || '',
+        priority: w.priority || '',
+      })),
+    };
+
+    setSaveStatus('idle', 'Loaded from Supabase');
+  } catch(err) {
+    console.error('Supabase load error:', err);
+    // Fall back to local draft so admin is still usable
+    try { DATA = JSON.parse(localStorage.getItem('cms_draft')||'null') || clone(DEFAULT_DATA); }
+    catch(_) { DATA = clone(DEFAULT_DATA); }
+    setSaveStatus('error', 'Supabase load failed — using local draft: ' + err.message);
   }
   hydrate();
 }
@@ -513,42 +613,49 @@ function hydrate(){
 function clone(o){return JSON.parse(JSON.stringify(o));}
 
 // ═══════════════════════════════════════
-//  DIRTY TRACKING — changes accumulate in DATA
-//  and are pushed on Publish
+//  DIRTY TRACKING
 // ═══════════════════════════════════════
 let isDirty=false;
-function markDirty(){isDirty=true;setSaveStatus('idle','Unsaved changes — click Publish');}
+function markDirty(){
+  isDirty=true;
+  setSaveStatus('idle','Unsaved changes — click Publish');
+  // Always keep a local draft as safety net
+  localStorage.setItem('cms_draft', JSON.stringify(DATA));
+}
 
 // ═══════════════════════════════════════
-//  PUBLISH — POST to serverless function
+//  PUBLISH → save.js → Supabase + GitHub
 // ═══════════════════════════════════════
-async function publishToGitHub(){
+async function publish(){
   const secret=localStorage.getItem('admin_secret')||'';
-  if(!secret){alert('Paste your ADMIN_SECRET in the Setup tab before publishing.');showTab('setup',document.querySelector('.sb-btn:last-child'));return;}
+  if(!secret){
+    alert('Paste your ADMIN_SECRET in the Setup tab before publishing.');
+    showTab('setup', document.querySelector('.sb-btn[onclick*="setup"]'));
+    return;
+  }
 
-  setSaveStatus('saving','Publishing…');
+  setSaveStatus('saving','Saving to Supabase…');
   document.getElementById('publish-btn').disabled=true;
 
-  // Always persist a local draft first (safe fallback)
-  localStorage.setItem('cms_draft',JSON.stringify(DATA));
+  // Always keep a local draft as a safety net
+  localStorage.setItem('cms_draft', JSON.stringify(DATA));
 
   try{
     const res=await fetch('/.netlify/functions/save',{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Admin-Secret':secret},
-      body:JSON.stringify({content:DATA})
+      body:JSON.stringify({ content: DATA })
     });
     const json=await res.json();
-    if(!res.ok)throw new Error(json.error||res.statusText);
+    if(!res.ok) throw new Error(json.error || res.statusText);
 
     isDirty=false;
-    setSaveStatus('saved','Published ✓ — redeploying…');
-    if(json.url){document.getElementById('deploy-status').innerHTML=`<a href="${json.url}" target="_blank">View commit ↗</a>`;}
-    // After ~60s the deploy should be done — reset status
-    setTimeout(()=>{if(!isDirty)setSaveStatus('idle','No unsaved changes');},65000);
+    setSaveStatus('saved','Saved to Supabase ✓');
+    document.getElementById('deploy-status').textContent='';
+    setTimeout(()=>{ if(!isDirty) setSaveStatus('idle','No unsaved changes'); }, 3000);
   }catch(err){
     console.error(err);
-    setSaveStatus('error','Publish failed: '+err.message);
+    setSaveStatus('error','Save failed: '+err.message);
   }finally{
     document.getElementById('publish-btn').disabled=false;
   }
@@ -559,23 +666,46 @@ function setSaveStatus(state,text){
   el.className=state; el.textContent=text;
 }
 
-// Check if we have a working function endpoint
-async function checkEnv(){
-  const box=document.getElementById('env-check-box');
-  const secret=localStorage.getItem('admin_secret')||'';
-  if(!secret){box.innerHTML='<strong>⚠ Not configured yet.</strong> Set your <code>ADMIN_SECRET</code> above and ensure all env vars are in Netlify. See the steps below.';return;}
-  try{
-    // Send an empty POST — the function will return 401 if the secret is wrong, 500 if env vars are missing
-    const res=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Secret':'__CHECK__'},body:JSON.stringify({content:{}})});
-    if(res.status===401){box.style.background='rgba(78,201,148,0.06)';box.style.borderColor='rgba(78,201,148,0.2)';box.innerHTML='<strong style="color:var(--green)">✓ Function reachable.</strong> GitHub env vars are configured. You can publish.';}
-    else if(res.status===500){const j=await res.json();box.innerHTML=`<strong>⚠ Function error:</strong> ${j.error} — check your Netlify env vars.`;}
-    else{box.innerHTML='Function responded with status '+res.status;}
-  }catch(e){
-    if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){
-      box.innerHTML='<strong>Local dev mode.</strong> The publish function only runs on Netlify. Changes are saved to localStorage and will sync when you deploy.';
-    }else{
-      box.innerHTML='<strong>⚠ Could not reach function:</strong> '+e.message;
+// ═══════════════════════════════════════
+//  SUPABASE CONNECTION TEST
+// ═══════════════════════════════════════
+async function testSupabase() {
+  const sbUrl  = localStorage.getItem('sb_url')  || '';
+  const sbAnon = localStorage.getItem('sb_anon') || '';
+  const result = document.getElementById('sb-test-result');
+  if (!sbUrl || !sbAnon) { result.textContent = '⚠ Enter both URL and Anon Key first.'; result.style.color='var(--yellow)'; return; }
+  result.textContent = 'Testing…'; result.style.color='var(--muted)';
+  try {
+    const res = await fetch(`${sbUrl}/rest/v1/site_config?limit=1`, {
+      headers: { apikey: sbAnon, Authorization: `Bearer ${sbAnon}` },
+    });
+    if (res.ok) {
+      result.textContent = '✓ Connected to Supabase successfully.';
+      result.style.color = 'var(--green)';
+      document.getElementById('env-check-box').innerHTML =
+        '<strong style="color:var(--green)">✓ Supabase connected.</strong> You can now click Publish to save your content.';
+    } else {
+      const t = await res.text();
+      result.textContent = `✗ Error ${res.status}: ${t.slice(0,120)}`;
+      result.style.color = 'var(--red)';
     }
+  } catch(e) {
+    result.textContent = '✗ Could not reach Supabase: ' + e.message;
+    result.style.color = 'var(--red)';
+  }
+}
+
+async function checkEnv() {
+  const box    = document.getElementById('env-check-box');
+  const sbUrl  = localStorage.getItem('sb_url')  || '';
+  const sbAnon = localStorage.getItem('sb_anon') || '';
+  const secret = localStorage.getItem('admin_secret') || '';
+  if (!sbUrl || !sbAnon) {
+    box.innerHTML = '⚠ Supabase not configured. Enter your Project URL and Anon Key in the fields below.';
+  } else if (!secret) {
+    box.innerHTML = '⚠ Supabase configured. Now paste your <code style="font-family:var(--mono)">ADMIN_SECRET</code> in Step 3 below.';
+  } else {
+    box.innerHTML = 'Supabase and ADMIN_SECRET configured. Click <strong style="color:var(--text)">Test Supabase Connection</strong> to verify.';
   }
 }
 
@@ -712,12 +842,36 @@ function openEditor(id){
   document.getElementById('ep-date').value=post.date||'';
   document.getElementById('rte-editor').innerHTML=post.content||'';
   document.getElementById('editor-label').textContent=post.title||'Untitled';
+  updateEditorUrl(post);
+}
+function updateEditorUrl(post){
+  const el=document.getElementById('editor-post-url');
+  if(post.slug){
+    const url=`${window.location.origin}/writing/${post.slug}`;
+    el.href=url; el.textContent=`/writing/${post.slug}`; el.style.opacity='1'; el.style.pointerEvents='auto';
+  } else {
+    el.style.opacity='0'; el.style.pointerEvents='none'; el.textContent='—';
+  }
 }
 function closeEditor(){currentPostId=null;document.getElementById('write-editor-view').style.display='none';document.getElementById('write-list-view').style.display='block';renderWriteCards();}
-function addPost(){if(!DATA.write)DATA.write=[];const id=Date.now().toString();DATA.write.push({id,title:'',subtitle:'',date:new Date().toISOString().slice(0,10),content:''});markDirty();openEditor(id);}
+function addPost(){if(!DATA.write)DATA.write=[];const id=Date.now().toString();DATA.write.push({id,title:'',subtitle:'',date:new Date().toISOString().slice(0,10),content:'',slug:''});markDirty();openEditor(id);}
 function deleteCurrentPost(){if(!currentPostId)return;if(!confirm('Delete post?'))return;DATA.write=(DATA.write||[]).filter(p=>p.id!==currentPostId);markDirty();closeEditor();}
-function editorUpdate(k,v){const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;post[k]=v;if(k==='title')document.getElementById('editor-label').textContent=v||'Untitled';markDirty();}
+function editorUpdate(k,v){
+  const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;
+  post[k]=v;
+  if(k==='title'){
+    document.getElementById('editor-label').textContent=v||'Untitled';
+    // Auto-generate slug from title if none set yet
+    if(!post.slug){ post.slug=slugify(v); updateEditorUrl(post); }
+  }
+  markDirty();
+}
 function editorContentChanged(){const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;post.content=document.getElementById('rte-editor').innerHTML;markDirty();}
+
+// Client-side slugify (mirrors the one in save.js)
+function slugify(str){
+  return(str||'untitled').toLowerCase().trim().replace(/[^\w\s-]/g,'').replace(/[\s_]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'untitled';
+}
 
 // RTE commands
 function fmt(cmd){document.getElementById('rte-editor').focus();document.execCommand(cmd,false,null);editorContentChanged();}
@@ -811,18 +965,21 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 //  INIT
 // ═══════════════════════════════════════
 function initAdmin(){
-  document.getElementById('f-name').value       =DATA.hero.name;
-  document.getElementById('f-tagline').value    =DATA.hero.tagline;
-  document.getElementById('f-email').value      =DATA.hero.links.email;
-  document.getElementById('f-linkedin').value   =DATA.hero.links.linkedin;
-  document.getElementById('f-photo-url').value  =DATA.hero.photo?.startsWith('data:')?'':(DATA.hero.photo||'');
-  document.getElementById('f-resume-label').value=DATA.resume.label;
-  document.getElementById('f-resume-url').value  =DATA.resume.url;
-  document.getElementById('f-c-email').value    =DATA.contact.email;
-  document.getElementById('f-c-linkedin').value =DATA.contact.linkedin;
-  document.getElementById('f-c-note').value     =DATA.contact.note;
-  document.getElementById('f-gr-id').value      =DATA.goodreads?.userId||'20847060';
-  document.getElementById('f-admin-secret').value=localStorage.getItem('admin_secret')||'';
+  document.getElementById('f-name').value        = DATA.hero.name        || '';
+  document.getElementById('f-tagline').value     = DATA.hero.tagline     || '';
+  document.getElementById('f-email').value       = DATA.hero.links?.email    || '';
+  document.getElementById('f-linkedin').value    = DATA.hero.links?.linkedin || '';
+  document.getElementById('f-photo-url').value   = DATA.hero.photo?.startsWith('data:') ? '' : (DATA.hero.photo||'');
+  document.getElementById('f-resume-label').value= DATA.resume.label     || '';
+  document.getElementById('f-resume-url').value  = DATA.resume.url       || '';
+  document.getElementById('f-c-email').value     = DATA.contact.email    || '';
+  document.getElementById('f-c-linkedin').value  = DATA.contact.linkedin || '';
+  document.getElementById('f-c-note').value      = DATA.contact.note     || '';
+  document.getElementById('f-gr-id').value       = DATA.goodreads?.userId || '20847060';
+  // Restore saved credentials
+  document.getElementById('f-admin-secret').value = localStorage.getItem('admin_secret') || '';
+  document.getElementById('f-sb-url').value        = localStorage.getItem('sb_url')       || '';
+  document.getElementById('f-sb-anon').value       = localStorage.getItem('sb_anon')      || '';
   updatePhotoPreview();
   renderTLCards();
   renderProjCards();
@@ -830,7 +987,7 @@ function initAdmin(){
   renderWriteCards();
   renderWishCards();
   renderVisibility();
-  setSaveStatus('idle','No unsaved changes');
+  if (!isDirty) setSaveStatus('idle', 'No unsaved changes');
 }
 
 // Boot

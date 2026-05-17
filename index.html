@@ -102,32 +102,13 @@
     /* WRITE */
     #write { background:var(--sand); }
     .post-list { display:grid; gap:0; }
-    .post-row { padding:1.5rem 0; border-bottom:1px solid var(--rule); display:grid; grid-template-columns:1fr auto; align-items:center; gap:1rem; cursor:pointer; transition:opacity .18s; }
+    .post-row { padding:1.5rem 0; border-bottom:1px solid var(--rule); display:grid; grid-template-columns:1fr auto; align-items:center; gap:1rem; text-decoration:none; color:inherit; transition:opacity .18s; }
     .post-row:last-child { border-bottom:none; }
     .post-row:hover { opacity:0.7; }
     .post-row-date { font-size:0.7rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); margin-bottom:0.3rem; }
     .post-row-title { font-family:var(--serif); font-size:1.15rem; font-weight:700; color:var(--ink); line-height:1.25; }
     .post-row-sub { font-size:0.875rem; color:var(--muted); margin-top:0.25rem; line-height:1.5; }
     .post-row-arrow { color:var(--muted); font-size:1.1rem; }
-    #post-view { display:none; background:var(--sand); padding:4rem 2rem; }
-    .post-back { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.82rem; font-weight:500; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; margin-bottom:2rem; transition:color .2s; }
-    .post-back:hover { color:var(--accent); }
-    .post-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--rule); }
-    .post-header-date { font-size:0.72rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent); margin-bottom:0.75rem; display:block; }
-    .post-header-title { font-family:var(--serif); font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; line-height:1.1; margin-bottom:0.6rem; }
-    .post-header-sub { font-size:1.05rem; color:var(--muted); font-weight:300; line-height:1.6; }
-    .post-content { font-size:1rem; line-height:1.8; color:var(--ink); }
-    .post-content h1,.post-content h2 { font-family:var(--serif); font-weight:700; line-height:1.2; margin:2rem 0 0.75rem; }
-    .post-content h1 { font-size:1.7rem; } .post-content h2 { font-size:1.3rem; } .post-content h3 { font-size:1.05rem; font-weight:600; margin:1.5rem 0 0.5rem; }
-    .post-content p { margin:0 0 1.1rem; } .post-content ul,.post-content ol { padding-left:1.4rem; margin-bottom:1.1rem; } .post-content li { margin-bottom:0.3rem; }
-    .post-content a { color:var(--accent); text-decoration:underline; text-underline-offset:2px; }
-    .post-content img { max-width:100%; border-radius:8px; display:block; margin:1.5rem auto; box-shadow:0 4px 20px rgba(0,0,0,.1); }
-    .post-content iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:8px; display:block; margin:1.5rem 0; }
-    .post-content blockquote { border-left:3px solid var(--accent); padding:0.5rem 0 0.5rem 1.2rem; margin:1.5rem 0; color:var(--muted); font-style:italic; }
-    .post-content hr { border:none; border-top:1px solid var(--rule); margin:2rem 0; }
-    .post-content pre { background:var(--warm); border-radius:8px; padding:1rem 1.2rem; overflow-x:auto; font-size:0.85rem; margin:1.2rem 0; }
-    .post-content code { background:var(--warm); padding:1px 5px; border-radius:4px; font-size:0.88em; }
-
     /* READING */
     #reading { background:var(--card); }
     .shelf-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem; }
@@ -268,18 +249,6 @@
     </div>
   </section>
 
-  <div id="post-view">
-    <div class="inner" style="max-width:680px">
-      <button class="post-back" onclick="closePost()">← Back to writing</button>
-      <div class="post-header">
-        <span class="post-header-date" id="pv-date"></span>
-        <h1 class="post-header-title" id="pv-title"></h1>
-        <p class="post-header-sub" id="pv-sub"></p>
-      </div>
-      <div class="post-content" id="pv-content"></div>
-    </div>
-  </div>
-
   <div class="divider" id="divider-reading"></div>
 
   <section id="reading">
@@ -327,56 +296,108 @@
 
 <script>
 // ═══════════════════════════════════════════════
-//  EMBEDDED FALLBACK DATA
-//  Used when content.json can't be fetched
-//  (e.g. opening index.html directly from disk).
-//  On Netlify/Vercel, content.json is always served
-//  and this fallback is never used.
+//  SUPABASE CONFIG
+//  Public anon key — safe to expose in frontend.
+//  Reads are public; writes are blocked by RLS.
+//  Set these two values after creating your project.
 // ═══════════════════════════════════════════════
-const FALLBACK_DATA = {
-  hero: { name:"Samridh Kudesia", photo:"", tagline:"Product thinker building at the intersection of AI, education, and consumer tech.", links:{ linkedin:"https://www.linkedin.com/in/samridhkudesia/", email:"samridh@gmail.com" } },
-  timeline: [
-    { id:"1", company:"Park+", role:"Product Manager", subtext:"Building India's mobility future, one parking spot at a time.", website:"https://parkplus.io", startDate:"2022", endDate:"Present", duration:"2+ yrs", bullets:["Led product strategy for India's largest parking & mobility super-app","Owned CRM and mobile app roadmap serving millions of urban users","Collaborated cross-functionally with design, engineering, and growth teams"] },
-    { id:"2", company:"Plaksha University", role:"Founders' Office — Program Lead", subtext:"Helping reimagine what a technology university could look like in India.", website:"https://plaksha.edu.in", startDate:"2021", endDate:"2022", duration:"~1 yr", bullets:["Worked in the Founders' Office helping build a next-generation tech university","Spearheaded launch of a quality AI/ML program for advanced tech education"] },
-    { id:"3", company:"Leap Finance", role:"Associate", subtext:"Making international education financially accessible for Indian students.", website:"https://leapfinance.com", startDate:"2020", endDate:"2021", duration:"~1 yr", bullets:["Contributed to fintech product and operations at a leading EdFintech startup"] },
-    { id:"4", company:"Kuar — Koç University Arçelik Research Center", role:"Research Intern", subtext:"Exploring the intersection of design, creativity, and human-computer interaction.", website:"https://kuar.ku.edu.tr", startDate:"2019", endDate:"2020", duration:"~1 yr", bullets:["Conducted research in creative industries and human-computer interaction"] }
-  ],
-  resume: { label:"Download Resume", url:"https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link" },
-  projects: [
-    { id:"1", title:"Park+ Mobility Super-App", description:"Led product for India's largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.", url:"https://parkplus.io", tags:["Product","Mobile","Mobility"] },
-    { id:"2", title:"Plaksha AI/ML Program", description:"Designed and launched a rigorous AI/ML curriculum at Plaksha University.", url:"https://plaksha.edu.in", tags:["Education","AI","Program Design"] }
-  ],
-  quiz: [], write: [],
-  contact: { email:"samridh@gmail.com", linkedin:"https://www.linkedin.com/in/samridhkudesia/", note:"Open to interesting conversations about product, AI, and education." },
-  visibility: { experience:true, projects:true, quiz:true, write:true, reading:true, watch:true, wishlist:true, contact:true },
-  wishlistItems: []
-};
+const SB_URL  = 'https://ujucsvklrbolerbsgxel.supabase.co';   // e.g. https://xxxx.supabase.co
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqdWNzdmtscmJvbGVyYnNneGVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMDkwNDIsImV4cCI6MjA5NDU4NTA0Mn0.8qjKJ4bRNoUxBz33JqSiJ52cWreAK_8timBOdYKLGUM';
+
+async function sbGet(table, order = '') {
+  const qs  = order ? `?order=${order}` : '';
+  const res = await fetch(`${SB_URL}/rest/v1/${table}${qs}`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` },
+  });
+  if (!res.ok) throw new Error(`Supabase ${table}: ${res.status}`);
+  return res.json();
+}
 
 // ═══════════════════════════════════════════════
-//  BOOT — fetch content.json (served as a static
-//  file from the repo root on Netlify/Vercel).
-//  Falls back to FALLBACK_DATA when opened locally
-//  as a file:// URL so the site still renders.
+//  BOOT — fetch all tables from Supabase in
+//  parallel, then render. Falls back to embedded
+//  defaults when Supabase isn't configured yet
+//  (so the page still works when opened locally).
 // ═══════════════════════════════════════════════
 async function boot() {
-  let DATA;
-  try {
-    const res = await fetch('/content.json?v=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    DATA = await res.json();
-  } catch(e) {
-    // Graceful fallback — works when opening index.html directly from disk
-    DATA = JSON.parse(JSON.stringify(FALLBACK_DATA));
+  let DATA = buildFallback();
+
+  // Skip Supabase fetch if placeholder values are still present
+  const configured = SB_URL && SB_URL !== '%%SUPABASE_URL%%' && !SB_URL.includes('%%');
+
+  if (configured) {
+    try {
+      const [cfg, timeline, projects, quiz, posts, wishlist] = await Promise.all([
+        sbGet('site_config', 'id'),
+        sbGet('timeline',     'position'),
+        sbGet('projects',     'position'),
+        sbGet('quiz',         'position'),
+        sbGet('posts',        'updated_at.desc'),
+        sbGet('wishlist_items','position'),
+      ]);
+
+      const c = cfg[0] || {};
+      DATA = {
+        hero:       c.hero       || {},
+        resume:     c.resume     || {},
+        contact:    c.contact    || {},
+        visibility: c.visibility || {},
+        // Map snake_case DB columns → camelCase used by render functions
+        timeline: timeline.map(t => ({
+          id:        t.id,
+          company:   t.company,
+          role:      t.role,
+          subtext:   t.subtext   || '',
+          website:   t.website,
+          startDate: t.start_date,
+          endDate:   t.end_date,
+          duration:  t.duration,
+          bullets:   t.bullets   || [],
+        })),
+        projects: projects.map(p => ({
+          id:          p.id,
+          title:       p.title,
+          description: p.description,
+          url:         p.url,
+          tags:        p.tags || [],
+        })),
+        quiz: quiz.map(q => ({
+          id:    q.id,
+          title: q.title,
+          link:  q.link,
+          image: q.image,
+          blurb: q.blurb,
+          date:  q.date,
+        })),
+        write: posts.map(p => ({
+          id:       p.id,
+          title:    p.title,
+          subtitle: p.subtitle,
+          slug:     p.slug,
+          date:     p.date,
+          content:  p.content,
+        })),
+        wishlistItems: wishlist.map(w => ({
+          id:       w.id,
+          title:    w.title,
+          price:    w.price,
+          url:      w.url,
+          image:    w.image,
+          priority: w.priority,
+        })),
+      };
+    } catch(e) {
+      console.warn('Supabase fetch failed, using fallback data:', e.message);
+    }
   }
 
-  // ── Hydrate defaults ──────────────────────────────────────
-  DATA.visibility  = DATA.visibility  || {};
-  DATA.quiz        = DATA.quiz        || [];
-  DATA.write       = DATA.write       || [];
+  // Ensure all keys exist
+  DATA.visibility    = DATA.visibility    || {};
+  DATA.quiz          = DATA.quiz          || [];
+  DATA.write         = DATA.write         || [];
   DATA.wishlistItems = DATA.wishlistItems || [];
   DATA.timeline.forEach(t => { if (!t.subtext) t.subtext = ''; });
 
-  // ── Render all sections ───────────────────────────────────
   renderHero(DATA);
   renderTimeline(DATA);
   renderProjects(DATA);
@@ -387,14 +408,32 @@ async function boot() {
   applyVisibility(DATA);
   observeFade();
 
-  // ── Async: external feeds ─────────────────────────────────
+  // (window._DATA no longer needed — posts open via /writing/[slug] → writing.html)
+
   loadGoodreads();
   loadYouTube();
   setInterval(() => loadGoodreads(true), 3600000);
   setInterval(() => loadYouTube(true),   3600000);
+}
 
-  // ── Expose for post navigation ────────────────────────────
-  window._DATA = DATA;
+function buildFallback() {
+  return {
+    hero: { name:'Samridh Kudesia', photo:'', tagline:'Product thinker building at the intersection of AI, education, and consumer tech.', links:{ linkedin:'https://www.linkedin.com/in/samridhkudesia/', email:'samridh@gmail.com' } },
+    resume: { label:'Download Resume', url:'https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link' },
+    contact: { email:'samridh@gmail.com', linkedin:'https://www.linkedin.com/in/samridhkudesia/', note:'Open to interesting conversations about product, AI, and education.' },
+    visibility: { experience:true, projects:true, quiz:true, write:true, reading:true, watch:true, wishlist:true, contact:true },
+    timeline: [
+      { id:'1', company:'Park+', role:'Product Manager', subtext:'Building India\'s mobility future, one parking spot at a time.', website:'https://parkplus.io', startDate:'2022', endDate:'Present', duration:'2+ yrs', bullets:['Led product strategy for India\'s largest parking & mobility super-app','Owned CRM and mobile app roadmap serving millions of urban users'] },
+      { id:'2', company:'Plaksha University', role:'Founders\' Office — Program Lead', subtext:'Helping reimagine what a technology university could look like in India.', website:'https://plaksha.edu.in', startDate:'2021', endDate:'2022', duration:'~1 yr', bullets:['Worked in the Founders\' Office helping build a next-generation tech university','Spearheaded launch of a quality AI/ML program'] },
+      { id:'3', company:'Leap Finance', role:'Associate', subtext:'Making international education financially accessible for Indian students.', website:'https://leapfinance.com', startDate:'2020', endDate:'2021', duration:'~1 yr', bullets:['Contributed to fintech product and operations at a leading EdFintech startup'] },
+      { id:'4', company:'Kuar — Koç University Arçelik Research Center', role:'Research Intern', subtext:'Exploring the intersection of design, creativity, and human-computer interaction.', website:'https://kuar.ku.edu.tr', startDate:'2019', endDate:'2020', duration:'~1 yr', bullets:['Conducted research in creative industries and human-computer interaction'] },
+    ],
+    projects: [
+      { id:'1', title:'Park+ Mobility Super-App', description:'Led product for India\'s largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.', url:'https://parkplus.io', tags:['Product','Mobile','Mobility'] },
+      { id:'2', title:'Plaksha AI/ML Program', description:'Designed and launched a rigorous AI/ML curriculum at Plaksha University.', url:'https://plaksha.edu.in', tags:['Education','AI','Program Design'] },
+    ],
+    quiz: [], write: [], wishlistItems: [],
+  };
 }
 
 // ═══════════════════════════════════════════════
@@ -408,7 +447,6 @@ function applyVisibility(DATA) {
     document.getElementById('divider-'+id)?.classList.toggle('section-hidden', !show);
     document.getElementById('nav-li-'+id)?.classList.toggle('nav-hidden', !show);
   });
-  if (DATA.visibility.write === false) document.getElementById('post-view').style.display='none';
 }
 
 // ═══════════════════════════════════════════════
@@ -476,35 +514,18 @@ function renderWrite(D) {
   const c = document.getElementById('post-list-container');
   if (!posts.length) { c.innerHTML = `<p class="shelf-msg">No posts yet.</p>`; return; }
   c.innerHTML = `<div class="post-list">${posts.map(p => {
-    const ds = p.date ? new Date(p.date+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
-    return `<div class="post-row fade-in" onclick="openPost('${p.id}')">
+    const ds   = p.date ? new Date(p.date+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+    const href = p.slug ? `/writing/${p.slug}` : '#';
+    return `<a class="post-row fade-in" href="${href}">
       <div>
         ${ds ? `<div class="post-row-date">${ds}</div>` : ''}
         <div class="post-row-title">${p.title||'Untitled'}</div>
         ${p.subtitle ? `<div class="post-row-sub">${p.subtitle}</div>` : ''}
       </div>
       <span class="post-row-arrow">→</span>
-    </div>`;
+    </a>`;
   }).join('')}</div>`;
   observeFade();
-}
-
-function openPost(id) {
-  const post = (window._DATA?.write||[]).find(p=>p.id===id);
-  if (!post) return;
-  const ds = post.date ? new Date(post.date+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
-  document.getElementById('pv-date').textContent  = ds;
-  document.getElementById('pv-title').textContent = post.title||'Untitled';
-  document.getElementById('pv-sub').textContent   = post.subtitle||'';
-  document.getElementById('pv-content').innerHTML = post.content||'';
-  document.getElementById('write').style.display    = 'none';
-  document.getElementById('post-view').style.display = 'block';
-  window.scrollTo({top: document.getElementById('post-view').getBoundingClientRect().top + window.scrollY - 70, behavior:'smooth'});
-}
-function closePost() {
-  document.getElementById('post-view').style.display = 'none';
-  document.getElementById('write').style.display = '';
-  window.scrollTo({top: document.getElementById('write').getBoundingClientRect().top + window.scrollY - 70, behavior:'smooth'});
 }
 
 function renderContact(D) {
