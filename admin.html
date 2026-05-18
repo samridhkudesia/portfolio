@@ -520,10 +520,13 @@ async function loadData(){
 
   setSaveStatus('saving', 'Loading from Supabase…');
 
-  async function sbGet(table, order='') {
-    const qs  = order ? `?order=${order}` : '';
+  async function sbGet(table, qs='') {
     const res = await fetch(`${sbUrl}/rest/v1/${table}${qs}`, {
-      headers: { apikey: sbAnon, Authorization: `Bearer ${sbAnon}` },
+      headers: {
+        apikey:        sbAnon,
+        Authorization: `Bearer ${sbAnon}`,
+        Accept:        'application/json',
+      },
     });
     if (!res.ok) throw new Error(`Supabase ${table}: ${res.status} ${await res.text()}`);
     return res.json();
@@ -532,11 +535,11 @@ async function loadData(){
   try {
     const [cfg, timeline, projects, quiz, posts, wishlist] = await Promise.all([
       sbGet('site_config'),
-      sbGet('timeline',      'position'),
-      sbGet('projects',      'position'),
-      sbGet('quiz',          'position'),
-      sbGet('posts',         'updated_at.desc'),
-      sbGet('wishlist_items','position'),
+      sbGet('timeline',      '?order=position.asc'),
+      sbGet('projects',      '?order=position.asc'),
+      sbGet('quiz',          '?order=position.asc'),
+      sbGet('posts',         '?order=date.desc,updated_at.desc'),
+      sbGet('wishlist_items','?order=position.asc'),
     ]);
 
     const c = cfg[0] || {};
@@ -646,6 +649,14 @@ async function publish(){
       headers:{'Content-Type':'application/json','X-Admin-Secret':secret},
       body:JSON.stringify({ content: DATA })
     });
+
+    // Check content-type before parsing as JSON
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      const txt = await res.text();
+      throw new Error(`Function not reachable (got ${res.status} ${res.statusText}). Check netlify.toml has functions = "netlify/functions" and the site is redeployed.`);
+    }
+
     const json=await res.json();
     if(!res.ok) throw new Error(json.error || res.statusText);
 

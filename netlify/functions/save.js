@@ -44,15 +44,17 @@ exports.handler = async (event) => {
     apikey:         SUPABASE_SERVICE_KEY,
     Authorization:  `Bearer ${SUPABASE_SERVICE_KEY}`,
     'Content-Type': 'application/json',
-    Prefer:         'resolution=merge-duplicates',
   };
 
-  // Upsert a batch of rows (insert or update by primary key)
+  // Upsert: insert or update rows matched by primary key
   async function upsert(table, rows) {
     if (!rows || !rows.length) return;
     const res = await fetch(`${sbBase}/${table}`, {
       method: 'POST',
-      headers: sbHdrs,
+      headers: {
+        ...sbHdrs,
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
       body: JSON.stringify(rows),
     });
     if (!res.ok) {
@@ -63,20 +65,24 @@ exports.handler = async (event) => {
 
   // Delete rows whose id is NOT in the keep set
   async function deleteStale(table, keepIds) {
+    let filter;
     if (!keepIds.length) {
-      // Delete everything in the table
-      const res = await fetch(`${sbBase}/${table}?id=not.is.null`, {
-        method: 'DELETE', headers: sbHdrs,
-      });
-      if (!res.ok) throw new Error(`Supabase delete ${table}: ${res.status}`);
-      return;
+      // No rows to keep — delete everything
+      filter = `?id=neq.___nobody___`; // always-true filter that deletes all
+    } else {
+      // PostgREST "not in" syntax for text IDs: ?id=not.in.(val1,val2,...)
+      // IDs must NOT be quoted for text columns in PostgREST
+      const list = keepIds.map(id => String(id).replace(/[(),]/g, '')).join(',');
+      filter = `?id=not.in.(${list})`;
     }
-    // PostgREST "not in" filter: ?id=not.in.(id1,id2,...)
-    const list = keepIds.map(id => `"${String(id).replace(/"/g, '')}"`).join(',');
-    const res = await fetch(`${sbBase}/${table}?id=not.in.(${list})`, {
-      method: 'DELETE', headers: sbHdrs,
+    const res = await fetch(`${sbBase}/${table}${filter}`, {
+      method: 'DELETE',
+      headers: { ...sbHdrs, Prefer: 'return=minimal' },
     });
-    if (!res.ok) throw new Error(`Supabase delete stale ${table}: ${res.status} — ${await res.text()}`);
+    // 204 No Content is success; ignore 404 (nothing to delete)
+    if (!res.ok && res.status !== 404) {
+      throw new Error(`Supabase delete stale ${table}: ${res.status} — ${await res.text()}`);
+    }
   }
 
   try {

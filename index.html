@@ -296,106 +296,124 @@
 
 <script>
 // ═══════════════════════════════════════════════
-//  SUPABASE CONFIG
-//  Public anon key — safe to expose in frontend.
-//  Reads are public; writes are blocked by RLS.
-//  Set these two values after creating your project.
+//  SUPABASE — credentials come from localStorage
+//  (set once in admin panel → Setup tab).
+//  The anon key is safe to store in the browser;
+//  RLS allows public SELECT on all tables.
 // ═══════════════════════════════════════════════
-const SB_URL  = 'https://ujucsvklrbolerbsgxel.supabase.co';   // e.g. https://xxxx.supabase.co
-const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqdWNzdmtscmJvbGVyYnNneGVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMDkwNDIsImV4cCI6MjA5NDU4NTA0Mn0.8qjKJ4bRNoUxBz33JqSiJ52cWreAK_8timBOdYKLGUM';
+function getSbCreds() {
+  return {
+    url:  localStorage.getItem('sb_url')  || '',
+    anon: localStorage.getItem('sb_anon') || '',
+  };
+}
 
-async function sbGet(table, order = '') {
-  const qs  = order ? `?order=${order}` : '';
-  const res = await fetch(`${SB_URL}/rest/v1/${table}${qs}`, {
-    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` },
+async function sbGet(url, anon, table, qs = '') {
+  const res = await fetch(`${url}/rest/v1/${table}${qs}`, {
+    headers: {
+      apikey:        anon,
+      Authorization: `Bearer ${anon}`,
+      Accept:        'application/json',
+    },
   });
-  if (!res.ok) throw new Error(`Supabase ${table}: ${res.status}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Supabase ${table} ${res.status}: ${txt.slice(0, 200)}`);
+  }
   return res.json();
 }
 
 // ═══════════════════════════════════════════════
-//  BOOT — fetch all tables from Supabase in
-//  parallel, then render. Falls back to embedded
-//  defaults when Supabase isn't configured yet
-//  (so the page still works when opened locally).
+//  BOOT — reads Supabase credentials from
+//  localStorage, fetches all tables in parallel.
+//  Falls back to hardcoded defaults only if
+//  credentials are missing.
 // ═══════════════════════════════════════════════
 async function boot() {
   let DATA = buildFallback();
 
-  // Skip Supabase fetch if placeholder values are still present
-  const configured = SB_URL && SB_URL !== '%%SUPABASE_URL%%' && !SB_URL.includes('%%');
+  const { url, anon } = getSbCreds();
+  const configured = url && anon && url.startsWith('http');
 
   if (configured) {
     try {
+      const get = (table, qs) => sbGet(url, anon, table, qs);
       const [cfg, timeline, projects, quiz, posts, wishlist] = await Promise.all([
-        sbGet('site_config', 'id'),
-        sbGet('timeline',     'position'),
-        sbGet('projects',     'position'),
-        sbGet('quiz',         'position'),
-        sbGet('posts',        'updated_at.desc'),
-        sbGet('wishlist_items','position'),
+        get('site_config',   '?id=eq.main'),
+        get('timeline',      '?order=position.asc'),
+        get('projects',      '?order=position.asc'),
+        get('quiz',          '?order=position.asc'),
+        get('posts',         '?order=date.desc,updated_at.desc'),
+        get('wishlist_items','?order=position.asc'),
       ]);
 
       const c = cfg[0] || {};
       DATA = {
-        hero:       c.hero       || {},
-        resume:     c.resume     || {},
-        contact:    c.contact    || {},
-        visibility: c.visibility || {},
-        // Map snake_case DB columns → camelCase used by render functions
+        hero:       c.hero       || buildFallback().hero,
+        resume:     c.resume     || buildFallback().resume,
+        contact:    c.contact    || buildFallback().contact,
+        visibility: c.visibility || buildFallback().visibility,
         timeline: timeline.map(t => ({
           id:        t.id,
-          company:   t.company,
-          role:      t.role,
+          company:   t.company   || '',
+          role:      t.role      || '',
           subtext:   t.subtext   || '',
-          website:   t.website,
-          startDate: t.start_date,
-          endDate:   t.end_date,
-          duration:  t.duration,
-          bullets:   t.bullets   || [],
+          website:   t.website   || '',
+          startDate: t.start_date || '',
+          endDate:   t.end_date   || '',
+          duration:  t.duration   || '',
+          bullets:   Array.isArray(t.bullets) ? t.bullets : [],
         })),
         projects: projects.map(p => ({
           id:          p.id,
-          title:       p.title,
-          description: p.description,
-          url:         p.url,
-          tags:        p.tags || [],
+          title:       p.title       || '',
+          description: p.description || '',
+          url:         p.url         || '',
+          tags:        Array.isArray(p.tags) ? p.tags : [],
         })),
         quiz: quiz.map(q => ({
           id:    q.id,
-          title: q.title,
-          link:  q.link,
-          image: q.image,
-          blurb: q.blurb,
-          date:  q.date,
+          title: q.title || '',
+          link:  q.link  || '',
+          image: q.image || '',
+          blurb: q.blurb || '',
+          date:  q.date  || '',
         })),
         write: posts.map(p => ({
           id:       p.id,
-          title:    p.title,
-          subtitle: p.subtitle,
-          slug:     p.slug,
-          date:     p.date,
-          content:  p.content,
+          title:    p.title    || '',
+          subtitle: p.subtitle || '',
+          slug:     p.slug     || '',
+          date:     p.date     || '',
+          content:  p.content  || '',
         })),
         wishlistItems: wishlist.map(w => ({
           id:       w.id,
-          title:    w.title,
-          price:    w.price,
-          url:      w.url,
-          image:    w.image,
-          priority: w.priority,
+          title:    w.title    || '',
+          price:    w.price    || '',
+          url:      w.url      || '',
+          image:    w.image    || '',
+          priority: w.priority || '',
         })),
       };
     } catch(e) {
-      console.warn('Supabase fetch failed, using fallback data:', e.message);
+      console.error('Supabase fetch error:', e.message);
+      // Show a visible warning so it's obvious what's wrong
+      const warn = document.createElement('div');
+      warn.style.cssText = 'position:fixed;bottom:1rem;right:1rem;background:#c8520a;color:#fff;padding:.6rem 1rem;border-radius:8px;font-size:.8rem;z-index:9999;max-width:320px;line-height:1.4';
+      warn.textContent = '⚠ Supabase error: ' + e.message;
+      document.body.appendChild(warn);
+      setTimeout(() => warn.remove(), 8000);
     }
   }
 
-  // Ensure all keys exist
+  // Safety: ensure all arrays/objects exist
   DATA.visibility    = DATA.visibility    || {};
   DATA.quiz          = DATA.quiz          || [];
   DATA.write         = DATA.write         || [];
   DATA.wishlistItems = DATA.wishlistItems || [];
+  DATA.timeline      = DATA.timeline      || [];
+  DATA.projects      = DATA.projects      || [];
   DATA.timeline.forEach(t => { if (!t.subtext) t.subtext = ''; });
 
   renderHero(DATA);
@@ -407,8 +425,6 @@ async function boot() {
   renderWishlist(DATA);
   applyVisibility(DATA);
   observeFade();
-
-  // (window._DATA no longer needed — posts open via /writing/[slug] → writing.html)
 
   loadGoodreads();
   loadYouTube();
@@ -561,19 +577,14 @@ const GR_SHELVES=[
 let grCache={}, activeShelf='currently-reading';
 
 async function proxyFetch(url) {
-  for (const make of [
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
-  ]) {
-    try {
-      const r=await fetch(make(url),{signal:AbortSignal.timeout(9000)});
-      if (!r.ok) continue;
-      const t=await r.text();
-      if (t&&t.trim().length>50) return t;
-    } catch(_) {}
-  }
-  throw new Error('All proxies failed');
+  // Use our own Netlify function as a server-side proxy — no CORS issues,
+  // no third-party rate limits, no blocked domains.
+  const proxyUrl = `/.netlify/functions/proxy?url=${encodeURIComponent(url)}`;
+  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
+  if (!res.ok) throw new Error(`Proxy ${res.status}: ${await res.text()}`);
+  const text = await res.text();
+  if (!text || text.trim().length < 50) throw new Error('Empty response from proxy');
+  return text;
 }
 
 function parseGR(xml) {

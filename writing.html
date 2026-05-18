@@ -142,15 +142,23 @@
 </footer>
 
 <script>
-// ── Supabase config (replace placeholders after creating your project) ──────────
-const SB_URL  = '%%SUPABASE_URL%%';
-const SB_ANON = '%%SUPABASE_ANON_KEY%%';
+// ── Supabase — reads credentials from localStorage (set in admin Setup tab) ──────
+function getSbCreds() {
+  return {
+    url:  localStorage.getItem('sb_url')  || '',
+    anon: localStorage.getItem('sb_anon') || '',
+  };
+}
 
-async function sbGet(table, filter = '') {
-  const res = await fetch(`${SB_URL}/rest/v1/${table}${filter}`, {
-    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` },
+async function sbGet(url, anon, table, filter = '') {
+  const res = await fetch(`${url}/rest/v1/${table}${filter}`, {
+    headers: {
+      apikey:        anon,
+      Authorization: `Bearer ${anon}`,
+      Accept:        'application/json',
+    },
   });
-  if (!res.ok) throw new Error(`Supabase ${table}: ${res.status}`);
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
@@ -238,17 +246,19 @@ async function boot() {
     return;
   }
 
-  // Check Supabase is configured
-  if (!SB_URL || SB_URL.includes('%%')) {
-    showError('Not configured', 'Supabase credentials are not set in writing.html. See the Setup tab in the admin panel.');
+  const { url, anon } = getSbCreds();
+
+  if (!url || !anon || !url.startsWith('http')) {
+    showError('Not configured', 'Open the <a href="/admin" class="state-link">admin panel</a>, go to the Setup tab, and enter your Supabase URL and Anon Key.');
     return;
   }
 
   try {
-    // Fetch site name and the specific post in parallel
+    const get = (table, qs) => sbGet(url, anon, table, qs);
+
     const [cfgRows, postRows] = await Promise.all([
-      sbGet('site_config', '?id=eq.main&select=hero'),
-      sbGet('posts', `?slug=eq.${encodeURIComponent(slug)}&limit=1`),
+      get('site_config', '?id=eq.main&select=hero'),
+      get('posts', `?slug=eq.${encodeURIComponent(slug)}&limit=1`),
     ]);
 
     const siteName = cfgRows[0]?.hero?.name || 'Samridh Kudesia';
@@ -266,7 +276,7 @@ async function boot() {
 
   } catch (err) {
     console.error('writing.html error:', err);
-    showError('Could not load post', 'There was a problem fetching this post. Please try again in a moment.');
+    showError('Could not load post', 'Supabase error: ' + err.message);
   }
 }
 
