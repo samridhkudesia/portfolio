@@ -8,14 +8,35 @@
   to   = "/admin.html"
   status = 200
 
-# /writing/[slug] → writing.html (which reads the slug from the URL and fetches from Supabase)
-# No static per-post files needed — one page handles all posts dynamically
+# Dedicated section pages
+[[redirects]]
+  from = "/projects"
+  to   = "/projects.html"
+  status = 200
+
+[[redirects]]
+  from = "/quiz"
+  to   = "/quiz.html"
+  status = 200
+
+[[redirects]]
+  from = "/wishlist"
+  to   = "/wishlist.html"
+  status = 200
+
+# /writing (index of all posts)
+[[redirects]]
+  from = "/writing"
+  to   = "/writing-list.html"
+  status = 200
+
+# /writing/[slug] → writing.html (fetches post from Supabase by slug)
 [[redirects]]
   from = "/writing/*"
   to   = "/writing.html"
   status = 200
 
-# Prevent browsers caching HTML files so Supabase content is always fresh
+# Prevent caching HTML so Supabase content is always fresh
 [[headers]]
   for = "/*.html"
   [headers.values]

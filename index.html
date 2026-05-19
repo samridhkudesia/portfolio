@@ -147,7 +147,13 @@
     .wish-img { width:100%; aspect-ratio:1; object-fit:contain; border-radius:8px; background:var(--warm); display:block; padding:0.5rem; }
     .wish-img-ph { width:100%; aspect-ratio:1; border-radius:8px; background:var(--warm); display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
     .wish-title { font-size:0.85rem; font-weight:500; color:var(--ink); line-height:1.4; }
-    .wish-price { font-size:0.82rem; font-weight:600; color:var(--accent2); }
+    .wish-blurb { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+
+    /* HERO background image */
+    #hero.has-bg-image { background-size:cover; background-position:center; background-repeat:no-repeat; }
+    #hero.has-bg-image::before { background:none; }
+    #hero.has-bg-image .hero-inner { position:relative; z-index:1; }
+    #hero.has-bg-image::after { content:''; position:absolute; inset:0; background:rgba(245,240,232,0.72); pointer-events:none; }
 
     /* CONTACT */
     #contact { background:var(--ink); color:var(--sand); padding:5rem 2rem; text-align:center; }
@@ -159,9 +165,10 @@
     .contact-note { margin-top:1.2rem; font-size:0.88rem; color:rgba(245,240,232,.45); font-style:italic; }
 
     footer { background:var(--ink); border-top:1px solid rgba(255,255,255,.06); padding:1.2rem 2rem; text-align:center; font-size:0.75rem; color:rgba(245,240,232,.3); letter-spacing:0.04em; }
-    .shelf-msg { color:var(--muted); font-size:0.9rem; font-style:italic; padding:1.5rem 0; }
+    .view-all { font-size:0.78rem; font-weight:500; color:var(--accent); text-decoration:none; border:1.5px solid var(--accent); border-radius:99px; padding:4px 14px; transition:all .2s; white-space:nowrap; flex-shrink:0; }
+    .view-all:hover { background:var(--accent); color:#fff; }
 
-    /* Loading skeleton */
+    .shelf-msg { color:var(--muted); font-size:0.9rem; font-style:italic; padding:1.5rem 0; }
     .skeleton { background:linear-gradient(90deg, var(--warm) 25%, var(--rule) 50%, var(--warm) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:8px; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
@@ -182,12 +189,12 @@
   <a href="#hero" class="nav-name" id="nav-name">Samridh Kudesia</a>
   <ul class="nav-links">
     <li id="nav-li-experience"><a href="#experience">Work</a></li>
-    <li id="nav-li-projects"><a href="#projects">Projects</a></li>
-    <li id="nav-li-quiz"><a href="#quiz">Quiz</a></li>
-    <li id="nav-li-write"><a href="#write">Write</a></li>
+    <li id="nav-li-projects"><a href="/projects">Projects</a></li>
+    <li id="nav-li-quiz"><a href="/quiz">Quiz</a></li>
+    <li id="nav-li-write"><a href="/writing">Write</a></li>
     <li id="nav-li-reading"><a href="#reading">Reading</a></li>
     <li id="nav-li-watch"><a href="#watch">Watch</a></li>
-    <li id="nav-li-wishlist"><a href="#wishlist">Wishlist</a></li>
+    <li id="nav-li-wishlist"><a href="/wishlist">Wishlist</a></li>
     <li id="nav-li-contact"><a href="#contact">Contact</a></li>
   </ul>
 </nav>
@@ -223,8 +230,10 @@
 
   <section id="projects">
     <div class="inner">
-      <span class="sec-label">Work &amp; Side Projects</span>
-      <h2 class="sec-title" style="margin-bottom:2.5rem">Selected Projects</h2>
+      <div class="sec-header">
+        <div><span class="sec-label">Work &amp; Side Projects</span><h2 class="sec-title">Selected Projects</h2></div>
+        <a href="/projects" class="view-all">View all →</a>
+      </div>
       <div class="projects-grid" id="projects-container"></div>
     </div>
   </section>
@@ -233,8 +242,10 @@
 
   <section id="quiz">
     <div class="inner">
-      <span class="sec-label">Quizzes &amp; Tests</span>
-      <h2 class="sec-title" style="margin-bottom:2rem">Quiz</h2>
+      <div class="sec-header">
+        <div><span class="sec-label">Quizzes &amp; Tests</span><h2 class="sec-title">Quiz</h2></div>
+        <a href="/quiz" class="view-all">View all →</a>
+      </div>
       <div id="quiz-container"><p class="shelf-msg">No quizzes yet.</p></div>
     </div>
   </section>
@@ -243,8 +254,10 @@
 
   <section id="write">
     <div class="inner">
-      <span class="sec-label">Essays &amp; Writing</span>
-      <h2 class="sec-title" style="margin-bottom:2rem">Write</h2>
+      <div class="sec-header">
+        <div><span class="sec-label">Essays &amp; Writing</span><h2 class="sec-title">Write</h2></div>
+        <a href="/writing" class="view-all">View all →</a>
+      </div>
       <div id="post-list-container"></div>
     </div>
   </section>
@@ -274,8 +287,10 @@
 
   <section id="wishlist">
     <div class="inner">
-      <span class="sec-label">Wants</span>
-      <h2 class="sec-title" style="margin-bottom:2rem">Wishlist</h2>
+      <div class="sec-header">
+        <div><span class="sec-label">Wants</span><h2 class="sec-title">Wishlist</h2></div>
+        <a href="/wishlist" class="view-all">View all →</a>
+      </div>
       <div id="wishlist-container"></div>
     </div>
   </section>
@@ -470,16 +485,25 @@ function applyVisibility(DATA) {
 // ═══════════════════════════════════════════════
 function renderHero(D) {
   const d = D.hero;
-  document.getElementById('nav-name').textContent = d.name;
-  document.getElementById('footer-name').textContent = d.name;
-  document.getElementById('hero-name').textContent = d.name;
-  document.getElementById('hero-tagline').textContent = d.tagline;
-  const initials = d.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('nav-name').textContent = d.name || '';
+  document.getElementById('footer-name').textContent = d.name || '';
+  document.getElementById('hero-name').textContent = d.name || '';
+  document.getElementById('hero-tagline').textContent = d.tagline || '';
+  const initials = (d.name||'SK').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('hero-photo-wrap').innerHTML = d.photo
     ? `<img src="${d.photo}" class="hero-photo" alt="${d.name}" />`
     : `<div class="hero-photo-placeholder">${initials}</div>`;
-  document.getElementById('resume-btn').textContent = '↓ ' + D.resume.label;
-  document.getElementById('resume-btn').href = D.resume.url;
+  document.getElementById('resume-btn').textContent = '↓ ' + (D.resume.label||'Resume');
+  document.getElementById('resume-btn').href = D.resume.url || '#';
+  // Hero background image
+  const heroEl = document.getElementById('hero');
+  if (d.heroBg) {
+    heroEl.style.backgroundImage = `url('${d.heroBg}')`;
+    heroEl.classList.add('has-bg-image');
+  } else {
+    heroEl.style.backgroundImage = '';
+    heroEl.classList.remove('has-bg-image');
+  }
 }
 
 function renderTimeline(D) {
@@ -498,17 +522,20 @@ function renderTimeline(D) {
 }
 
 function renderProjects(D) {
-  document.getElementById('projects-container').innerHTML = D.projects.map(p => `
+  const items = (D.projects || []).slice(0, 3);
+  document.getElementById('projects-container').innerHTML = items.length
+    ? items.map(p => `
     <a class="proj-card fade-in" href="${p.url}" target="_blank" rel="noopener">
       <div class="proj-title">${p.title}<span class="proj-arrow">↗</span></div>
       <p class="proj-desc">${p.description}</p>
       <div class="proj-tags">${p.tags.map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
-    </a>`).join('');
+    </a>`).join('')
+    : '<p class="shelf-msg">No projects yet.</p>';
   observeFade();
 }
 
 function renderQuiz(D) {
-  const items = D.quiz || [];
+  const items = (D.quiz || []).slice(0, 3);
   const c = document.getElementById('quiz-container');
   if (!items.length) { c.innerHTML = `<p class="shelf-msg">No quizzes yet.</p>`; return; }
   c.innerHTML = `<div class="quiz-grid">${items.map(q => {
@@ -526,7 +553,7 @@ function renderQuiz(D) {
 }
 
 function renderWrite(D) {
-  const posts = (D.write||[]).slice().sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const posts = (D.write||[]).slice().sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0, 3);
   const c = document.getElementById('post-list-container');
   if (!posts.length) { c.innerHTML = `<p class="shelf-msg">No posts yet.</p>`; return; }
   c.innerHTML = `<div class="post-list">${posts.map(p => {
@@ -552,14 +579,14 @@ function renderContact(D) {
 }
 
 function renderWishlist(D) {
-  const items = D.wishlistItems||[];
+  const items = (D.wishlistItems||[]).slice(0, 3);
   const c = document.getElementById('wishlist-container');
   if (!items.length) { c.innerHTML=`<p class="shelf-msg">No items yet.</p>`; return; }
   c.innerHTML=`<div class="wishlist-grid">${items.map(w=>`
     <a class="wish-card fade-in" href="${w.url||'#'}" target="_blank" rel="noopener">
       ${w.image?`<img src="${w.image}" class="wish-img" alt="${w.title}" loading="lazy"/>`:`<div class="wish-img-ph">🎁</div>`}
       <div class="wish-title">${w.title}</div>
-      ${w.price?`<div class="wish-price">${w.price}</div>`:''}
+      ${w.blurb?`<div class="wish-blurb">${w.blurb}</div>`:''}
     </a>`).join('')}</div>`;
   observeFade();
 }
@@ -588,18 +615,34 @@ async function proxyFetch(url) {
 }
 
 function parseGR(xml) {
-  const doc=new DOMParser().parseFromString(xml,'text/xml');
-  return [...doc.querySelectorAll('item')].map(item=>{
-    const raw=item.querySelector('title')?.textContent?.trim()||'';
-    const link=item.querySelector('link')?.textContent?.trim()||'#';
-    const desc=item.querySelector('description')?.textContent||'';
-    const byIdx=raw.lastIndexOf(' by ');
-    const title=byIdx>0?raw.slice(0,byIdx).trim():raw;
-    const author=byIdx>0?raw.slice(byIdx+4).trim():'';
-    const imgM=desc.match(/<img[^>]+src=["']([^"']+)["']/i);
-    const cover=imgM?imgM[1].replace(/\._[A-Z0-9,_]+_\./g,'._SY300_.') :'';
-    return {title,author,cover,link};
-  }).filter(b=>b.title);
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  // Check for parse error
+  if (doc.querySelector('parsererror')) throw new Error('XML parse error');
+  return [...doc.querySelectorAll('item')].map(item => {
+    const raw  = item.querySelector('title')?.textContent?.trim() || '';
+    // <link> in RSS is tricky — it's often a text node between elements
+    // Use the <link> element text, or fall back to guid
+    const linkEl = item.querySelector('link');
+    const link   = linkEl?.textContent?.trim() ||
+                   item.querySelector('guid')?.textContent?.trim() || '#';
+    const desc   = item.querySelector('description')?.textContent || '';
+
+    // Parse "Title by Author" format
+    const byIdx  = raw.lastIndexOf(' by ');
+    const title  = byIdx > 0 ? raw.slice(0, byIdx).trim() : raw;
+    const author = byIdx > 0 ? raw.slice(byIdx + 4).trim() : '';
+
+    // Extract book cover from HTML inside <description>
+    // Goodreads embeds an <img> tag — parse it from the CDATA
+    const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+    let cover = '';
+    if (imgMatch) {
+      // Upsize thumbnail: replace size suffixes like ._SX50_. or ._SY75_. with a larger size
+      cover = imgMatch[1].replace(/\._[A-Z]{2}\d+_\./g, '._SY300_.');
+    }
+
+    return { title, author, cover, link };
+  }).filter(b => b.title);
 }
 
 async function loadGoodreads(force=false) {
@@ -644,7 +687,7 @@ function renderBooks() {
 // ═══════════════════════════════════════════════
 const YT_PL='PLMygqSN0pwQhRszMy8H88LIWV77S7Y0Zj', YT_TTL=3600000;
 async function loadYouTube(force=false) {
-  const ck='yt_v2', tk='yt_ts_v2';
+  const ck='yt_v3', tk='yt_ts_v3';
   if (!force) {
     const ts=parseInt(localStorage.getItem(tk)||'0'),raw=localStorage.getItem(ck);
     if (raw&&Date.now()-ts<YT_TTL){try{renderVideos(JSON.parse(raw));return;}catch(_){}}
@@ -653,18 +696,40 @@ async function loadYouTube(force=false) {
   try {
     const xml=await proxyFetch(`https://www.youtube.com/feeds/videos.xml?playlist_id=${YT_PL}`);
     const doc=new DOMParser().parseFromString(xml,'text/xml');
+    if (doc.querySelector('parsererror')) throw new Error('YouTube feed XML parse error');
+
     const vids=[...doc.querySelectorAll('entry')].map(e=>{
-      const vid=e.querySelector('videoId')?.textContent?.trim()||'';
-      const title=e.querySelector('title')?.textContent?.trim()||'';
-      const pub=e.querySelector('published')?.textContent||'';
-      const ch=e.querySelector('author name')?.textContent?.trim()||'';
-      return {vid,title,thumb:vid?`https://i.ytimg.com/vi/${vid}/mqdefault.jpg`:'',
-        url:vid?`https://www.youtube.com/watch?v=${vid}&list=${YT_PL}`:'#',channel:ch,
-        date:pub?new Date(pub).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''};
-    }).filter(v=>v.vid);
+      // yt:videoId is a namespaced element — querySelector('videoId') fails in some browsers
+      // Use getElementsByTagNameNS or fall back to extracting from the link href
+      const videoIdEl = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015','videoId')[0]
+                     || e.querySelector('videoId');
+      let vid = videoIdEl?.textContent?.trim() || '';
+
+      // Fallback: extract video ID from <link rel="alternate"> href
+      if (!vid) {
+        const linkHref = e.querySelector('link[rel="alternate"]')?.getAttribute('href') || '';
+        const m = linkHref.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+        if (m) vid = m[1];
+      }
+
+      const title = e.querySelector('title')?.textContent?.trim() || '';
+      const pub   = e.querySelector('published')?.textContent || '';
+      const ch    = e.querySelector('author name')?.textContent?.trim() || '';
+
+      return {
+        vid, title,
+        thumb: vid ? `https://i.ytimg.com/vi/${vid}/mqdefault.jpg` : '',
+        url:   vid ? `https://www.youtube.com/watch?v=${vid}&list=${YT_PL}` : '#',
+        channel: ch,
+        date: pub ? new Date(pub).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '',
+      };
+    }).filter(v => v.vid);
+
+    if (!vids.length) throw new Error('No videos parsed from feed');
     localStorage.setItem(ck,JSON.stringify(vids)); localStorage.setItem(tk,Date.now().toString());
     renderVideos(vids);
   } catch(e) {
+    console.error('YouTube load error:', e.message);
     document.getElementById('videos-container').innerHTML=`<p class="shelf-msg">Could not load playlist. <a href="https://youtube.com/playlist?list=${YT_PL}" target="_blank" style="color:var(--accent)">View on YouTube ↗</a></p>`;
   }
 }

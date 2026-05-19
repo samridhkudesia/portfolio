@@ -230,17 +230,31 @@
             <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
           </div>
         </div>
-        <div class="field"><label>Photo URL</label>
+        <div class="field"><label>Profile Photo URL</label>
           <input type="text" id="f-photo-url" placeholder="https://…" oninput="DATA.hero.photo=this.value;updatePhotoPreview();markDirty()" /></div>
         <div class="field-row">
           <div class="field"><label>Full Name</label><input type="text" id="f-name" oninput="DATA.hero.name=this.value;markDirty()" /></div>
-          <div class="field"><label>Email</label><input type="text" id="f-email" oninput="DATA.hero.links.email=this.value;markDirty()" /></div>
+          <div class="field"><label>Email</label><input type="text" id="f-email" oninput="if(!DATA.hero.links)DATA.hero.links={};DATA.hero.links.email=this.value;markDirty()" /></div>
         </div>
         <div class="field"><label>Tagline</label><input type="text" id="f-tagline" oninput="DATA.hero.tagline=this.value;markDirty()" /></div>
-        <div class="field"><label>LinkedIn URL</label><input type="text" id="f-linkedin" oninput="DATA.hero.links.linkedin=this.value;markDirty()" /></div>
+        <div class="field"><label>LinkedIn URL</label><input type="text" id="f-linkedin" oninput="if(!DATA.hero.links)DATA.hero.links={};DATA.hero.links.linkedin=this.value;markDirty()" /></div>
         <div class="field"><label>Resume Button Label</label><input type="text" id="f-resume-label" oninput="DATA.resume.label=this.value;markDirty()" /></div>
         <div class="field"><label>Resume URL</label><input type="text" id="f-resume-url" oninput="DATA.resume.url=this.value;markDirty()" />
           <div class="field-hint">Google Drive, Dropbox, or any direct link.</div></div>
+        <div style="height:1px;background:var(--border);margin:1rem 0"></div>
+        <div class="pane-title" style="font-size:0.9rem;margin-bottom:1rem">🖼 Hero Background Image</div>
+        <div class="field-hint" style="margin-bottom:0.8rem">Optional full-width image behind the hero section. A light overlay is applied automatically so text stays readable.</div>
+        <div class="photo-row">
+          <div id="bg-preview" style="width:96px;height:56px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted)">🏞</div>
+          <div class="photo-btns">
+            <button class="btn-photo" onclick="document.getElementById('bg-file').click()">Upload Image</button>
+            <button class="btn-photo" onclick="clearHeroBg()">Remove</button>
+            <input type="file" id="bg-file" accept="image/*" style="display:none" onchange="handleHeroBg(event)" />
+          </div>
+        </div>
+        <div class="field"><label>Background Image URL</label>
+          <input type="text" id="f-hero-bg" placeholder="https://…" oninput="DATA.hero.heroBg=this.value;updateBgPreview();markDirty()" />
+        </div>
       </div>
 
       <!-- TIMELINE -->
@@ -287,6 +301,11 @@
             <div class="field"><label>Subtitle</label>
               <input type="text" id="ep-subtitle" placeholder="Optional subtitle or teaser…" oninput="editorUpdate('subtitle',this.value)" /></div>
             <div class="field"><label>Date</label><input type="date" id="ep-date" oninput="editorUpdate('date',this.value)" /></div>
+          </div>
+          <div class="field">
+            <label>Slug (URL path — e.g. <span style="font-family:var(--mono);font-size:.8em">/writing/my-post-title</span>)</label>
+            <input type="text" id="ep-slug" placeholder="my-post-title" oninput="editorUpdateSlug(this.value)" style="font-family:var(--mono);font-size:0.85rem" />
+            <div class="field-hint">Auto-generated from title. Edit to customise. Only lowercase letters, numbers, and hyphens.</div>
           </div>
           <div class="rte-wrap">
             <div class="rte-toolbar">
@@ -584,12 +603,11 @@ async function loadData(){
         content:  p.content  || '',
       })),
       wishlistItems: wishlist.map(w => ({
-        id:       w.id,
-        title:    w.title    || '',
-        price:    w.price    || '',
-        url:      w.url      || '',
-        image:    w.image    || '',
-        priority: w.priority || '',
+        id:    w.id,
+        title: w.title || '',
+        blurb: w.blurb || '',
+        url:   w.url   || '',
+        image: w.image || '',
       })),
     };
 
@@ -736,7 +754,21 @@ function showTab(name,btn){
 // ═══════════════════════════════════════
 function handlePhoto(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{DATA.hero.photo=ev.target.result;document.getElementById('f-photo-url').value='';updatePhotoPreview();markDirty();};r.readAsDataURL(f);}
 function clearPhoto(){DATA.hero.photo='';document.getElementById('f-photo-url').value='';updatePhotoPreview();markDirty();}
-function updatePhotoPreview(){const p=document.getElementById('photo-prev');if(DATA.hero.photo)p.innerHTML=`<img src="${DATA.hero.photo}"/>`;else p.textContent=DATA.hero.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function updatePhotoPreview(){const p=document.getElementById('photo-prev');if(DATA.hero.photo)p.innerHTML=`<img src="${DATA.hero.photo}"/>`;else p.textContent=(DATA.hero.name||'SK').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+function handleHeroBg(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{if(!DATA.hero)DATA.hero={};DATA.hero.heroBg=ev.target.result;document.getElementById('f-hero-bg').value='';updateBgPreview();markDirty();};r.readAsDataURL(f);}
+function clearHeroBg(){if(!DATA.hero)DATA.hero={};DATA.hero.heroBg='';document.getElementById('f-hero-bg').value='';updateBgPreview();markDirty();}
+function updateBgPreview(){const p=document.getElementById('bg-preview');if(DATA.hero&&DATA.hero.heroBg){p.innerHTML='';p.style.backgroundImage=`url('${DATA.hero.heroBg}')`;p.style.backgroundSize='cover';p.style.backgroundPosition='center';}else{p.innerHTML='🏞';p.style.backgroundImage='';}}
+
+// Slug: editable by user, auto-generated from title if blank
+function editorUpdateSlug(raw){
+  const post=(DATA.write||[]).find(p=>p.id===currentPostId);if(!post)return;
+  // Sanitise input: only lowercase letters, numbers, hyphens
+  const clean=raw.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  post.slug=clean;
+  updateEditorUrl(post);
+  markDirty();
+}
 
 // ═══════════════════════════════════════
 //  TIMELINE
@@ -913,24 +945,14 @@ function renderWishCards(){
         <div class="ic-actions"><button class="btn-sm btn-del" onclick="removeWish(${i})">Remove</button></div>
       </div>
       <div class="field"><label>Title</label><input type="text" value="${esc(w.title)}" oninput="updateWish(${i},'title',this.value)"/></div>
-      <div class="field-row">
-        <div class="field"><label>Price</label><input type="text" value="${esc(w.price||'')}" oninput="updateWish(${i},'price',this.value)"/></div>
-        <div class="field"><label>Priority</label>
-          <select onchange="updateWish(${i},'priority',this.value)">
-            <option value="" ${!w.priority?'selected':''}>None</option>
-            <option value="High" ${w.priority==='High'?'selected':''}>High</option>
-            <option value="Medium" ${w.priority==='Medium'?'selected':''}>Medium</option>
-            <option value="Low" ${w.priority==='Low'?'selected':''}>Low</option>
-          </select>
-        </div>
-      </div>
-      <div class="field"><label>Amazon URL</label><input type="text" value="${esc(w.url||'')}" oninput="updateWish(${i},'url',this.value)"/></div>
+      <div class="field"><label>Blurb (short description)</label><textarea style="min-height:60px" oninput="updateWish(${i},'blurb',this.value)">${esc(w.blurb||'')}</textarea></div>
+      <div class="field"><label>Amazon / Product URL</label><input type="text" value="${esc(w.url||'')}" oninput="updateWish(${i},'url',this.value)"/></div>
       <div class="field"><label>Image URL</label><input type="text" value="${esc(w.image||'')}" oninput="updateWish(${i},'image',this.value)"/></div>
     </div>`).join('');
 }
 function updateWish(i,k,v){DATA.wishlistItems[i][k]=v;document.querySelector(`[data-wish="${i}"] .ic-title`).textContent=DATA.wishlistItems[i].title||'New Item';markDirty();}
 function removeWish(i){DATA.wishlistItems.splice(i,1);renderWishCards();markDirty();}
-function addWish(){if(!DATA.wishlistItems)DATA.wishlistItems=[];DATA.wishlistItems.push({title:'',price:'',url:'',image:'',priority:''});renderWishCards();markDirty();}
+function addWish(){if(!DATA.wishlistItems)DATA.wishlistItems=[];DATA.wishlistItems.push({title:'',blurb:'',url:'',image:''});renderWishCards();markDirty();}
 
 // ═══════════════════════════════════════
 //  VISIBILITY

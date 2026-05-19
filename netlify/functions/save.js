@@ -163,11 +163,10 @@ exports.handler = async (event) => {
     const wishRows = (content.wishlistItems || []).map((w, i) => ({
       id:        String(w.id || i),
       position:  i,
-      title:     w.title    || '',
-      price:     w.price    || '',
-      url:       w.url      || '',
-      image:     w.image    || '',
-      priority:  w.priority || '',
+      title:     w.title || '',
+      blurb:     w.blurb || '',
+      url:       w.url   || '',
+      image:     w.image || '',
       updated_at: new Date().toISOString(),
     }));
     await upsert('wishlist_items', wishRows);
