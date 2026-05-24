@@ -159,7 +159,17 @@ exports.handler = async (event) => {
     await upsert('posts', postRows);
     await deleteStale('posts', postRows.map(r => r.id));
 
-    // ── 6. wishlist_items ────────────────────────────────────────────────────
+    // ── 6. sections ──────────────────────────────────────────────────────────
+    const sectionRows = (content.sections || []).map((s, i) => ({
+      id:        s.id,
+      position:  i,
+      name:      s.name  || '',
+      blurb:     s.blurb || '',
+      updated_at: new Date().toISOString(),
+    }));
+    if (sectionRows.length) await upsert('sections', sectionRows);
+
+    // ── 7. wishlist_items ────────────────────────────────────────────────────
     const wishRows = (content.wishlistItems || []).map((w, i) => ({
       id:        String(w.id || i),
       position:  i,
@@ -182,6 +192,7 @@ exports.handler = async (event) => {
           projects:      projRows.length,
           quiz:          quizRows.length,
           posts:         postRows.length,
+          sections:      sectionRows.length,
           wishlistItems: wishRows.length,
         },
       }),

@@ -131,7 +131,27 @@ create table if not exists posts (
 -- Slug must be unique so URLs never collide
 create unique index if not exists posts_slug_idx on posts (slug);
 
--- ── 6. wishlist_items ────────────────────────────────────────
+-- ── 6. sections ─────────────────────────────────────────────
+--  Stores display name, blurb, and order for each site section.
+create table if not exists sections (
+  id          text primary key,   -- matches section key: experience, projects, etc.
+  position    integer not null default 0,
+  name        text not null default '',
+  blurb       text not null default '',
+  updated_at  timestamptz default now()
+);
+
+insert into sections (id, position, name, blurb) values
+  ('experience', 0, 'Professional Timeline', 'The roles and companies that shaped how I think about product, people, and problems.'),
+  ('projects',   1, 'Selected Projects',     'A mix of professional work and side experiments I''ve shipped over the years.'),
+  ('quiz',       2, 'Quiz',                  'Tests and quizzes I''ve put together — topics I find interesting enough to obsess over.'),
+  ('write',      3, 'Write',                 'Essays, notes, and half-baked ideas. Written mostly to think things through.'),
+  ('reading',    4, 'Reading',               'What I''m reading, what I''ve finished, and what''s been sitting on my to-read pile too long.'),
+  ('watch',      5, 'Watch',                 'Videos worth your time — from my curated YouTube playlist.'),
+  ('wishlist',   6, 'Wishlist',              'Things I''ve been eyeing. Hints welcome.')
+on conflict (id) do nothing;
+
+-- ── 7. wishlist_items ────────────────────────────────────────
 create table if not exists wishlist_items (
   id          text primary key,
   position    integer not null default 0,
@@ -159,14 +179,25 @@ alter table timeline       enable row level security;
 alter table projects       enable row level security;
 alter table quiz           enable row level security;
 alter table posts          enable row level security;
+alter table sections       enable row level security;
 alter table wishlist_items enable row level security;
 
--- Public read policies
+-- Drop existing read policies
+drop policy if exists "public read site_config"    on site_config;
+drop policy if exists "public read timeline"       on timeline;
+drop policy if exists "public read projects"       on projects;
+drop policy if exists "public read quiz"           on quiz;
+drop policy if exists "public read posts"          on posts;
+drop policy if exists "public read sections"       on sections;
+drop policy if exists "public read wishlist_items" on wishlist_items;
+
+-- Recreate them
 create policy "public read site_config"    on site_config    for select using (true);
 create policy "public read timeline"       on timeline       for select using (true);
 create policy "public read projects"       on projects       for select using (true);
 create policy "public read quiz"           on quiz           for select using (true);
 create policy "public read posts"          on posts          for select using (true);
+create policy "public read sections"       on sections       for select using (true);
 create policy "public read wishlist_items" on wishlist_items for select using (true);
 
 -- ============================================================
