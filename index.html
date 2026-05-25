@@ -32,10 +32,11 @@
     main { padding-top:var(--nav-h); }
     section { padding:6rem 2rem; }
     .inner { max-width:var(--max); margin:0 auto; }
-    .sec-label { font-size:0.7rem; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:0.6rem; display:block; }
-    .sec-header { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem; }
+    .sec-label { display:none; }
+    .sec-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem 1rem; margin-bottom:0; }
     .sec-title { font-family:var(--serif); font-size:clamp(2rem,5vw,3rem); font-weight:700; line-height:1.15; }
-    .sec-blurb { font-size:0.95rem; color:var(--muted); max-width:560px; line-height:1.65; margin-top:0.35rem; font-weight:300; }
+    .sec-blurb { font-size:0.95rem; color:var(--muted); max-width:560px; line-height:1.65; font-weight:300; margin-top:0.5rem; margin-bottom:2.5rem; }
+    .sec-header-wrap { margin-bottom:2.5rem; }
     .divider { height:1px; background:var(--rule); max-width:var(--max); margin:0 auto; }
     .section-hidden { display:none !important; }
     .fade-in { opacity:0; transform:translateY(18px); transition:opacity .5s ease, transform .5s ease; }
@@ -57,33 +58,49 @@
     .btn-resume { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.78rem; font-weight:500; color:var(--accent); border:1.5px solid var(--accent); border-radius:99px; padding:5px 16px; text-decoration:none; transition:all .2s; white-space:nowrap; flex-shrink:0; }
     .btn-resume:hover { background:var(--accent); color:#fff; }
 
-    /* TIMELINE */
+    /* TIMELINE — journey UI */
     #experience { background:var(--card); }
-    .timeline { position:relative; padding-left:2px; }
-    .timeline::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:2px; background:linear-gradient(to bottom,var(--accent),var(--accent2)); border-radius:2px; }
-    .tl-item { padding:0 0 3.5rem 2rem; position:relative; }
+    .tl-section-divider { display:flex; align-items:center; gap:1rem; margin:2rem 0 2.2rem; }
+    .tl-section-divider-line { flex:1; height:1px; background:var(--rule); }
+    .tl-section-label { font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+    .timeline { position:relative; padding-left:52px; }
+    .timeline::before { content:''; position:absolute; left:20px; top:4px; bottom:4px; width:2px; background:linear-gradient(to bottom,var(--accent) 0%,var(--accent2) 60%,var(--rule) 100%); border-radius:2px; }
+    .tl-item { position:relative; padding-bottom:3rem; }
     .tl-item:last-child { padding-bottom:0; }
-    .tl-dot { position:absolute; left:-5px; top:6px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:2px solid var(--card); box-shadow:0 0 0 2px var(--accent); }
-    .tl-meta { display:flex; flex-wrap:wrap; align-items:baseline; gap:0.5rem 1rem; margin-bottom:0.25rem; }
-    .tl-company { font-family:var(--serif); font-size:1.2rem; font-weight:700; color:var(--ink); text-decoration:none; }
+    .tl-logo-wrap { position:absolute; left:-52px; top:0; width:42px; height:42px; border-radius:10px; background:#fff; border:1.5px solid var(--rule); box-shadow:0 2px 8px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
+    .tl-logo-wrap.edu { background:var(--warm); border-color:var(--accent2); }
+    .tl-logo { width:28px; height:28px; object-fit:contain; display:block; }
+    .tl-logo-fallback { font-size:1.1rem; line-height:1; }
+    .tl-connector { position:absolute; left:-31px; top:20px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--card); box-shadow:0 0 0 2px var(--accent); }
+    .tl-item.edu .tl-connector { background:var(--accent2); box-shadow:0 0 0 2px var(--accent2); }
+    .tl-card { background:var(--sand); border:1px solid var(--rule); border-radius:12px; padding:1.2rem 1.4rem; transition:box-shadow .2s; }
+    .tl-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.07); }
+    .tl-item.edu .tl-card { border-color:rgba(42,107,92,.18); background:rgba(42,107,92,.03); }
+    .tl-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.3rem; }
+    .tl-company { font-family:var(--serif); font-size:1.05rem; font-weight:700; color:var(--ink); text-decoration:none; line-height:1.2; }
     .tl-company:hover { color:var(--accent); }
-    .tl-role { font-size:0.85rem; font-weight:500; color:var(--accent2); background:rgba(42,107,92,.08); padding:2px 10px; border-radius:99px; }
-    .tl-dates { font-size:0.78rem; color:var(--muted); letter-spacing:0.03em; }
-    .tl-subtext { font-size:0.88rem; color:var(--muted); font-style:italic; margin:0.3rem 0 0.5rem; line-height:1.5; }
-    .tl-bullets { margin-top:0.4rem; padding-left:1.1rem; }
-    .tl-bullets li { font-size:0.9rem; color:var(--muted); margin-bottom:0.3rem; line-height:1.55; }
+    .tl-dates { font-size:0.72rem; color:var(--muted); white-space:nowrap; flex-shrink:0; margin-top:3px; letter-spacing:0.02em; }
+    .tl-role { display:inline-block; font-size:0.8rem; font-weight:500; color:var(--accent2); background:rgba(42,107,92,.08); padding:2px 10px; border-radius:99px; margin-bottom:0.55rem; }
+    .tl-item.edu .tl-role { color:var(--accent); background:rgba(200,82,10,.07); }
+    .tl-subtext { font-size:0.85rem; color:var(--muted); font-style:italic; margin-bottom:0.65rem; line-height:1.5; }
+    .tl-bullets { padding-left:1.1rem; margin:0; }
+    .tl-bullets li { font-size:0.865rem; color:var(--muted); margin-bottom:0.3rem; line-height:1.6; }
+    .tl-bullets li strong { color:var(--ink); font-weight:600; }
 
     /* PROJECTS */
     #projects { background:var(--sand); }
-    .projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.4rem; }
-    .proj-card { background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:1.6rem; text-decoration:none; color:inherit; transition:all .22s; display:flex; flex-direction:column; gap:0.6rem; }
+    .projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.4rem; }
+    .proj-card { background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:1.2rem; text-decoration:none; color:inherit; transition:all .22s; display:flex; flex-direction:column; gap:0.6rem; }
     .proj-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 24px rgba(200,82,10,.12); }
-    .proj-title { font-family:var(--serif); font-size:1.05rem; font-weight:700; color:var(--ink); display:flex; align-items:center; justify-content:space-between; }
-    .proj-arrow { color:var(--muted); font-size:1rem; transition:transform .2s; }
+    .proj-img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; background:var(--warm); display:block; }
+    .proj-img-ph { width:100%; aspect-ratio:16/9; border-radius:8px; background:linear-gradient(135deg,var(--warm),var(--rule)); display:flex; align-items:center; justify-content:center; font-size:2.2rem; }
+    .proj-title { font-family:var(--serif); font-size:0.95rem; font-weight:700; color:var(--ink); line-height:1.3; display:flex; align-items:start; justify-content:space-between; gap:0.5rem; }
+    .proj-title span { flex:1; }
+    .proj-arrow { color:var(--muted); font-size:0.85rem; margin-top:3px; flex-shrink:0; transition:transform .2s, color .2s; }
     .proj-card:hover .proj-arrow { transform:translate(2px,-2px); color:var(--accent); }
-    .proj-desc { font-size:0.875rem; color:var(--muted); line-height:1.55; }
-    .proj-tags { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.4rem; }
-    .proj-tag { font-size:0.7rem; font-weight:500; letter-spacing:0.05em; color:var(--accent2); background:rgba(42,107,92,.08); padding:2px 9px; border-radius:99px; }
+    .proj-desc { font-size:0.82rem; color:var(--muted); line-height:1.55; }
+    .proj-tags { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.2rem; }
+    .proj-tag { font-size:0.68rem; font-weight:500; letter-spacing:0.05em; color:var(--accent2); background:rgba(42,107,92,.08); padding:2px 8px; border-radius:99px; }
 
     /* QUIZ */
     #quiz { background:var(--card); }
@@ -115,13 +132,17 @@
     .shelf-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem; }
     .shelf-tab { padding:0.4rem 1rem; border-radius:99px; font-size:0.78rem; font-weight:500; border:1.5px solid var(--rule); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; }
     .shelf-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:1.4rem; }
-    .book-card { display:flex; flex-direction:column; gap:0.6rem; text-decoration:none; color:inherit; transition:transform .2s; }
+    .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1.6rem; }
+    .book-card { display:flex; flex-direction:column; gap:0.5rem; text-decoration:none; color:inherit; transition:transform .2s; }
     .book-card:hover { transform:translateY(-2px); }
     .book-cover { width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,.12); display:block; }
     .book-cover-ph { width:100%; aspect-ratio:2/3; border-radius:6px; background:linear-gradient(135deg,var(--warm),var(--rule)); display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
-    .book-title { font-size:0.82rem; font-weight:500; color:var(--ink); line-height:1.35; }
+    .book-title { font-size:0.82rem; font-weight:600; color:var(--ink); line-height:1.35; }
     .book-author { font-size:0.75rem; color:var(--muted); }
+    .book-rating { font-size:0.78rem; color:var(--accent); letter-spacing:0.04em; line-height:1; }
+    .book-review { font-size:0.74rem; color:var(--muted); line-height:1.5; font-style:italic; margin-top:0.1rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .books-view-all { display:inline-flex; align-items:center; gap:0.4rem; margin-top:1.5rem; font-size:0.8rem; font-weight:500; color:var(--accent); text-decoration:none; border:1.5px solid var(--accent); border-radius:99px; padding:5px 16px; transition:all .2s; }
+    .books-view-all:hover { background:var(--accent); color:#fff; }
 
     /* WATCH */
     #watch { background:var(--sand); }
@@ -163,17 +184,11 @@
     .contact-chips { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
     .contact-chip { display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1.2rem; border:1.5px solid rgba(245,240,232,.15); border-radius:99px; color:rgba(245,240,232,.7); text-decoration:none; font-size:0.82rem; transition:all .2s; }
     .contact-chip:hover { border-color:var(--accent); color:#fff; background:rgba(200,82,10,.15); }
-    /* Form */
     .contact-form { max-width:560px; margin:0 auto; }
     .cf-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
     .cf-field { display:flex; flex-direction:column; gap:0.35rem; margin-bottom:1rem; }
     .cf-field label { font-size:0.68rem; font-weight:500; letter-spacing:0.09em; text-transform:uppercase; color:rgba(245,240,232,.4); }
-    .cf-field input, .cf-field textarea {
-      width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
-      border-radius:8px; padding:0.65rem 0.9rem; color:var(--sand);
-      font-family:var(--sans); font-size:0.9rem; outline:none; resize:none;
-      transition:border-color .2s, background .2s;
-    }
+    .cf-field input, .cf-field textarea { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:0.65rem 0.9rem; color:var(--sand); font-family:var(--sans); font-size:0.9rem; outline:none; resize:none; transition:border-color .2s, background .2s; }
     .cf-field input::placeholder, .cf-field textarea::placeholder { color:rgba(245,240,232,.25); }
     .cf-field input:focus, .cf-field textarea:focus { border-color:rgba(200,82,10,.6); background:rgba(255,255,255,.08); }
     .cf-field textarea { min-height:130px; line-height:1.6; }
@@ -237,9 +252,12 @@
 
   <section id="experience">
     <div class="inner">
-      <div class="sec-header">
-        <div><span class="sec-label">Career</span><h2 class="sec-title">Professional Timeline</h2></div>
-        <a id="resume-btn" href="#" target="_blank" rel="noopener" class="btn-resume">↓ Resume</a>
+      <div class="sec-header-wrap" id="experience-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="experience-title">Professional Timeline</h2>
+          <a id="resume-btn" href="#" target="_blank" rel="noopener" class="btn-resume">↓ Resume</a>
+        </div>
+        <p class="sec-blurb" id="experience-blurb" style="display:none"></p>
       </div>
       <div class="timeline" id="timeline-container"></div>
     </div>
@@ -249,9 +267,12 @@
 
   <section id="projects">
     <div class="inner">
-      <div class="sec-header">
-        <div><span class="sec-label">Work &amp; Side Projects</span><h2 class="sec-title">Selected Projects</h2></div>
-        <a href="/projects" class="view-all">View all →</a>
+      <div class="sec-header-wrap" id="projects-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="projects-title">Selected Projects</h2>
+          <a href="/projects" class="view-all">View all →</a>
+        </div>
+        <p class="sec-blurb" id="projects-blurb" style="display:none"></p>
       </div>
       <div class="projects-grid" id="projects-container"></div>
     </div>
@@ -261,9 +282,12 @@
 
   <section id="quiz">
     <div class="inner">
-      <div class="sec-header">
-        <div><span class="sec-label">Quizzes &amp; Tests</span><h2 class="sec-title">Quiz</h2></div>
-        <a href="/quiz" class="view-all">View all →</a>
+      <div class="sec-header-wrap" id="quiz-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="quiz-title">Quiz</h2>
+          <a href="/quiz" class="view-all">View all →</a>
+        </div>
+        <p class="sec-blurb" id="quiz-blurb" style="display:none"></p>
       </div>
       <div id="quiz-container"><p class="shelf-msg">No quizzes yet.</p></div>
     </div>
@@ -273,9 +297,12 @@
 
   <section id="write">
     <div class="inner">
-      <div class="sec-header">
-        <div><span class="sec-label">Essays &amp; Writing</span><h2 class="sec-title">Write</h2></div>
-        <a href="#" id="write-view-all" class="view-all" target="_blank" rel="noopener">View all →</a>
+      <div class="sec-header-wrap" id="write-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="write-title">Write</h2>
+          <a href="#" id="write-view-all" class="view-all" target="_blank" rel="noopener">View all →</a>
+        </div>
+        <p class="sec-blurb" id="write-blurb" style="display:none"></p>
       </div>
       <div id="post-list-container"><p class="shelf-msg">Loading…</p></div>
     </div>
@@ -285,8 +312,12 @@
 
   <section id="reading">
     <div class="inner">
-      <span class="sec-label">Books</span>
-      <h2 class="sec-title" style="margin-bottom:1.8rem">Reading</h2>
+      <div class="sec-header-wrap" id="reading-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="reading-title">Reading</h2>
+        </div>
+        <p class="sec-blurb" id="reading-blurb" style="display:none"></p>
+      </div>
       <div class="shelf-tabs" id="shelf-tabs"></div>
       <div id="books-container"><p class="shelf-msg">Loading shelves…</p></div>
     </div>
@@ -296,8 +327,12 @@
 
   <section id="watch">
     <div class="inner">
-      <span class="sec-label">Videos</span>
-      <h2 class="sec-title" style="margin-bottom:2rem">Watch</h2>
+      <div class="sec-header-wrap" id="watch-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="watch-title">Watch</h2>
+        </div>
+        <p class="sec-blurb" id="watch-blurb" style="display:none"></p>
+      </div>
       <div id="videos-container"><p class="shelf-msg">Loading playlist…</p></div>
     </div>
   </section>
@@ -306,9 +341,12 @@
 
   <section id="wishlist">
     <div class="inner">
-      <div class="sec-header">
-        <div><span class="sec-label">Wants</span><h2 class="sec-title">Wishlist</h2></div>
-        <a href="/wishlist" class="view-all">View all →</a>
+      <div class="sec-header-wrap" id="wishlist-header">
+        <div class="sec-header">
+          <h2 class="sec-title" id="wishlist-title">Wishlist</h2>
+          <a href="/wishlist" class="view-all">View all →</a>
+        </div>
+        <p class="sec-blurb" id="wishlist-blurb" style="display:none"></p>
       </div>
       <div id="wishlist-container"></div>
     </div>
@@ -396,10 +434,10 @@ async function boot() {
       const [cfg, timeline, projects, quiz, posts, wishlist, sections] = await Promise.all([
         get('site_config',   '?id=eq.main'),
         get('timeline',      '?order=position.asc'),
-        get('projects',      '?order=position.asc'),
-        get('quiz',          '?order=position.asc'),
+        get('projects',      '?order=updated_at.desc'),
+        get('quiz',          '?order=updated_at.desc'),
         get('posts',         '?order=date.desc,updated_at.desc'),
-        get('wishlist_items','?order=position.asc'),
+        get('wishlist_items','?order=updated_at.desc'),
         get('sections',      '?order=position.asc'),
       ]);
 
@@ -411,10 +449,12 @@ async function boot() {
         visibility: c.visibility || buildFallback().visibility,
         timeline: timeline.map(t => ({
           id:        t.id,
-          company:   t.company   || '',
-          role:      t.role      || '',
-          subtext:   t.subtext   || '',
-          website:   t.website   || '',
+          company:   t.company    || '',
+          role:      t.role       || '',
+          subtext:   t.subtext    || '',
+          website:   t.website    || '',
+          logo:      t.logo       || '',
+          type:      t.type       || 'work',
           startDate: t.start_date || '',
           endDate:   t.end_date   || '',
           duration:  t.duration   || '',
@@ -425,6 +465,7 @@ async function boot() {
           title:       p.title       || '',
           description: p.description || '',
           url:         p.url         || '',
+          image:       p.image       || '',
           tags:        Array.isArray(p.tags) ? p.tags : [],
         })),
         quiz: quiz.map(q => ({
@@ -449,12 +490,11 @@ async function boot() {
           blurb: s.blurb || '',
         })),
         wishlistItems: wishlist.map(w => ({
-          id:       w.id,
-          title:    w.title    || '',
-          price:    w.price    || '',
-          url:      w.url      || '',
-          image:    w.image    || '',
-          priority: w.priority || '',
+          id:    w.id,
+          title: w.title || '',
+          blurb: w.blurb || '',
+          url:   w.url   || '',
+          image: w.image || '',
         })),
       };
     } catch(e) {
@@ -499,27 +539,27 @@ function buildFallback() {
   return {
     hero: { name:'Samridh Kudesia', photo:'', tagline:'Product thinker building at the intersection of AI, education, and consumer tech.', links:{ linkedin:'https://www.linkedin.com/in/samridhkudesia/', email:'samridh@gmail.com' } },
     resume: { label:'Download Resume', url:'https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link' },
-    contact: { email:'samridh@gmail.com', linkedin:'https://www.linkedin.com/in/samridhkudesia/', note:'Open to interesting conversations about product, AI, and education.', substack:'' },
+    contact: { email:'samridh@gmail.com', linkedin:'https://www.linkedin.com/in/samridhkudesia/', note:'Open to interesting conversations about product, AI, and education.', substack:'', whatsapp:'' },
     visibility: { experience:true, projects:true, quiz:true, write:true, reading:true, watch:true, wishlist:true, contact:true },
     timeline: [
-      { id:'1', company:'Park+', role:'Product Manager', subtext:'Building India\'s mobility future, one parking spot at a time.', website:'https://parkplus.io', startDate:'2022', endDate:'Present', duration:'2+ yrs', bullets:['Led product strategy for India\'s largest parking & mobility super-app','Owned CRM and mobile app roadmap serving millions of urban users'] },
-      { id:'2', company:'Plaksha University', role:'Founders\' Office — Program Lead', subtext:'Helping reimagine what a technology university could look like in India.', website:'https://plaksha.edu.in', startDate:'2021', endDate:'2022', duration:'~1 yr', bullets:['Worked in the Founders\' Office helping build a next-generation tech university','Spearheaded launch of a quality AI/ML program'] },
-      { id:'3', company:'Leap Finance', role:'Associate', subtext:'Making international education financially accessible for Indian students.', website:'https://leapfinance.com', startDate:'2020', endDate:'2021', duration:'~1 yr', bullets:['Contributed to fintech product and operations at a leading EdFintech startup'] },
-      { id:'4', company:'Kuar — Koç University Arçelik Research Center', role:'Research Intern', subtext:'Exploring the intersection of design, creativity, and human-computer interaction.', website:'https://kuar.ku.edu.tr', startDate:'2019', endDate:'2020', duration:'~1 yr', bullets:['Conducted research in creative industries and human-computer interaction'] },
+      { id:'1', type:'work', company:'Park+', role:'Product Manager', subtext:'Sequoia-funded · Automating platform workflows across finance, operations and sales.', website:'https://parkplus.io', logo:'', startDate:'Dec 2024', endDate:'Present', duration:'~6 mo', bullets:['<strong>Product Discovery:</strong> Led 10 engineers across 3 platform services to automate ~90% of B2B invoices. Improved UX driving a <strong>75% reduction</strong> in daily product issues.','<strong>Stakeholder Management:</strong> Shipped Virtual Accounts (<strong>unclaimed revenue 5→2 Cr</strong>) and Late Fee (<strong>unpaid invoices ↓30%</strong>).'] },
+      { id:'2', type:'work', company:'LeapFinance', role:'Associate Product Manager', subtext:'Sequoia-funded · First PM at an early-stage edtech helping Indian students study abroad.', website:'https://leapscholar.com', logo:'', startDate:'2022', endDate:'Dec 2024', duration:'2 yrs', bullets:['<strong>Growth:</strong> Launched a Clubhouse-style spoken-English product. Grew <strong>DAU 1,200→10,000</strong> with zero additional marketing spend.','<strong>Retention:</strong> Pivoted to practice-oriented learning (Duolingo-style UX). <strong>D7 retention 7%→18%</strong> — a 2.5× jump.','<strong>Monetization:</strong> Automated IELTS evaluation via AI APIs. TAT <strong>1 day→2 min</strong>, revenue <strong>₹4K→₹1L/day</strong>.','<strong>App Store:</strong> Analysed 2,000+ reviews; smart nudges at moments of delight. <strong>Play Store rating 4.1→4.5</strong> in 2 months.','<strong>Cost Containment:</strong> Pro-bono evaluator programme. Maintained 4.3/5 NPS at <strong>1/3rd the cost</strong>.'] },
+      { id:'3', type:'work', company:'Plaksha University', role:"Product Associate, Founders' Office", subtext:'5-member strategy team working with 80+ global CxOs to launch a new-age tech university.', website:'https://plaksha.edu.in', logo:'', startDate:'2019', endDate:'2022', duration:'2 yrs 6 mo', bullets:['<strong>Product Development:</strong> Launched applications & scholarships portal in 2 months — <strong>1,000+ applications</strong>.','<strong>Go-to-market:</strong> Digital campaigns for a new ₹10L product — <strong>60 sales</strong>.','<strong>Sales:</strong> Pitched 50+ organisations (BCG, IBM, Microsoft) to offer <strong>60+ student internships</strong>.'] },
+      { id:'4', type:'education', company:'Ashoka University', role:'B.Sc. (Hons.) Computer Science + Politics', subtext:'<5% acceptance rate · CGPA 3.2/4.0 · 75% Merit Scholarship', website:'https://ashoka.edu.in', logo:'', startDate:'2015', endDate:'2019', duration:'4 yrs', bullets:['Google & Microsoft sponsored India delegate to tech policy forums in <strong>Paris</strong> and <strong>Seoul</strong> (ICANN APIGA).','Winner, <strong>TATA Crucible Business Quiz</strong> · Elected: Student Council, Placement Cell · President: Quiz Society.','Java course-allocation algorithm adopted after pilot — benefits <strong>5,000+ students annually</strong>.','One of 2 Indians awarded <strong>Fellowship at Koç University, Istanbul</strong> — researched audio frameworks.'] },
     ],
     projects: [
-      { id:'1', title:'Park+ Mobility Super-App', description:'Led product for India\'s largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.', url:'https://parkplus.io', tags:['Product','Mobile','Mobility'] },
-      { id:'2', title:'Plaksha AI/ML Program', description:'Designed and launched a rigorous AI/ML curriculum at Plaksha University.', url:'https://plaksha.edu.in', tags:['Education','AI','Program Design'] },
+      { id:'1', title:'Park+ Mobility Super-App', description:'Led product for India\'s largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.', url:'https://parkplus.io', image:'', tags:['Product','Mobile','Mobility'] },
+      { id:'2', title:'Plaksha AI/ML Program', description:'Designed and launched a rigorous AI/ML curriculum at Plaksha University.', url:'https://plaksha.edu.in', image:'', tags:['Education','AI','Program Design'] },
     ],
     quiz: [], write: [], wishlistItems: [],
     sections: [
       { id:'experience', name:'Professional Timeline', blurb:'The roles and companies that shaped how I think about product, people, and problems.' },
-      { id:'projects',   name:'Selected Projects',     blurb:'A mix of professional work and side experiments I\'ve shipped over the years.' },
-      { id:'quiz',       name:'Quiz',                  blurb:'Tests and quizzes I\'ve put together — topics I find interesting enough to obsess over.' },
+      { id:'projects',   name:'Selected Projects',     blurb:"A mix of professional work and side experiments I've shipped over the years." },
+      { id:'quiz',       name:'Quiz',                  blurb:"Tests and quizzes I've put together — topics I find interesting enough to obsess over." },
       { id:'write',      name:'Write',                 blurb:'Essays, notes, and half-baked ideas. Written mostly to think things through.' },
-      { id:'reading',    name:'Reading',               blurb:'What I\'m reading, what I\'ve finished, and what\'s been sitting on my to-read pile too long.' },
+      { id:'reading',    name:'Reading',               blurb:"What I'm reading, what I've finished, and what's been sitting on my to-read pile too long." },
       { id:'watch',      name:'Watch',                 blurb:'Videos worth your time — from my curated YouTube playlist.' },
-      { id:'wishlist',   name:'Wishlist',              blurb:'Things I\'ve been eyeing. Hints welcome.' },
+      { id:'wishlist',   name:'Wishlist',              blurb:"Things I've been eyeing. Hints welcome." },
     ],
   };
 }
@@ -570,74 +610,126 @@ function renderHero(D) {
   }
 }
 
+// ── Shared header helper ─────────────────────────────────────
+function setSecHeader(id, name, blurb) {
+  const titleEl = document.getElementById(id + '-title');
+  const blurbEl = document.getElementById(id + '-blurb');
+  const wrap    = document.getElementById(id + '-header');
+  if (titleEl) titleEl.textContent = name;
+  if (blurbEl) {
+    if (blurb) { blurbEl.textContent = blurb; blurbEl.style.display = ''; }
+    else        { blurbEl.style.display = 'none'; }
+  }
+  if (wrap) wrap.style.marginBottom = blurb ? '0' : '2.5rem';
+}
+
+// ── URL safety helper ────────────────────────────────────────
+function safeUrl(u) {
+  if (!u) return '#';
+  if (/^https?:\/\//i.test(u)) return u;
+  return 'https://' + u;
+}
+
+// ── Logo from website domain via Google Favicons ─────────────
+function logoUrl(item) {
+  if (item.logo) return item.logo;
+  if (!item.website) return '';
+  try {
+    const domain = new URL(safeUrl(item.website)).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch(_) { return ''; }
+}
+
 function renderTimeline(D) {
-  const sec = getSection(D, 'experience');
-  const hdr = document.querySelector('#experience .sec-header > div');
-  if (hdr) hdr.innerHTML = `<span class="sec-label">Career</span><h2 class="sec-title">${sec.name || 'Professional Timeline'}</h2>${sec.blurb ? `<p class="sec-blurb">${sec.blurb}</p>` : ''}`;
-  document.getElementById('timeline-container').innerHTML = D.timeline.map(item => `
-    <div class="tl-item fade-in">
-      <div class="tl-dot"></div>
-      <div class="tl-meta">
-        <a class="tl-company" href="${item.website}" target="_blank" rel="noopener">${item.company}</a>
-        <span class="tl-role">${item.role}</span>
-        <span class="tl-dates">${item.startDate} – ${item.endDate} · ${item.duration}</span>
+  setSecHeader('experience', getSection(D,'experience').name || 'Professional Timeline', getSection(D,'experience').blurb);
+
+  const workItems = (D.timeline||[]).filter(t => t.type !== 'education');
+  const eduItems  = (D.timeline||[]).filter(t => t.type === 'education');
+
+  function tlItemHtml(item) {
+    const isEdu   = item.type === 'education';
+    const logo    = logoUrl(item);
+    const dateStr = [item.startDate, item.endDate].filter(Boolean).join(' – ')
+                  + (item.duration ? ` · ${item.duration}` : '');
+    return `
+      <div class="tl-item${isEdu ? ' edu' : ''} fade-in">
+        <div class="tl-logo-wrap${isEdu ? ' edu' : ''}">
+          ${logo
+            ? `<img class="tl-logo" src="${logo}" alt="${item.company}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <span class="tl-logo-fallback" style="display:none">${item.company.charAt(0)}</span>`
+            : `<span class="tl-logo-fallback">${item.company.charAt(0)}</span>`}
+        </div>
+        <div class="tl-connector"></div>
+        <div class="tl-card">
+          <div class="tl-top">
+            <a class="tl-company" href="${safeUrl(item.website)}" target="_blank" rel="noopener">${item.company}</a>
+            ${dateStr ? `<span class="tl-dates">${dateStr}</span>` : ''}
+          </div>
+          <span class="tl-role">${item.role}</span>
+          ${item.subtext ? `<p class="tl-subtext">${item.subtext}</p>` : ''}
+          ${item.bullets?.length ? `<ul class="tl-bullets">${item.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('timeline-container').innerHTML = `
+    ${workItems.length ? `
+      <div class="tl-section-divider">
+        <div class="tl-section-divider-line"></div>
+        <span class="tl-section-label">Work Experience</span>
+        <div class="tl-section-divider-line"></div>
       </div>
-      ${item.subtext ? `<p class="tl-subtext">${item.subtext}</p>` : ''}
-      <ul class="tl-bullets">${item.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-    </div>`).join('');
+      ${workItems.map(tlItemHtml).join('')}` : ''}
+    ${eduItems.length ? `
+      <div class="tl-section-divider" style="margin-top:${workItems.length?'3rem':'0'}">
+        <div class="tl-section-divider-line"></div>
+        <span class="tl-section-label">Education</span>
+        <div class="tl-section-divider-line"></div>
+      </div>
+      ${eduItems.map(tlItemHtml).join('')}` : ''}`;
   observeFade();
 }
 
 function renderProjects(D) {
-  const sec = getSection(D, 'projects');
-  const hdr = document.querySelector('#projects .sec-header > div');
-  if (hdr) hdr.innerHTML = `<span class="sec-label">Work &amp; Side Projects</span><h2 class="sec-title">${sec.name || 'Selected Projects'}</h2>${sec.blurb ? `<p class="sec-blurb">${sec.blurb}</p>` : ''}`;
-  const items = (D.projects || []).slice(0, 3);
+  setSecHeader('projects', getSection(D,'projects').name || 'Selected Projects', getSection(D,'projects').blurb);
+  const items = (D.projects||[]).slice(0,3);
   document.getElementById('projects-container').innerHTML = items.length
     ? items.map(p => `
-    <a class="proj-card fade-in" href="${p.url}" target="_blank" rel="noopener">
-      <div class="proj-title">${p.title}<span class="proj-arrow">↗</span></div>
-      <p class="proj-desc">${p.description}</p>
-      <div class="proj-tags">${p.tags.map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
-    </a>`).join('')
+      <a class="proj-card fade-in" href="${safeUrl(p.url)}" target="_blank" rel="noopener">
+        ${p.image
+          ? `<img src="${p.image}" class="proj-img" alt="${p.title}" loading="lazy"/>`
+          : `<div class="proj-img-ph">🛠</div>`}
+        <div class="proj-title"><span>${p.title}</span><span class="proj-arrow">↗</span></div>
+        ${p.description ? `<p class="proj-desc">${p.description}</p>` : ''}
+        <div class="proj-tags">${(p.tags||[]).map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
+      </a>`).join('')
     : '<p class="shelf-msg">No projects yet.</p>';
   observeFade();
 }
 
 function renderQuiz(D) {
-  const sec = getSection(D, 'quiz');
-  const hdr = document.querySelector('#quiz .sec-header > div');
-  if (hdr) hdr.innerHTML = `<span class="sec-label">Quizzes &amp; Tests</span><h2 class="sec-title">${sec.name || 'Quiz'}</h2>${sec.blurb ? `<p class="sec-blurb">${sec.blurb}</p>` : ''}`;
-  const items = (D.quiz || []).slice(0, 3);
+  setSecHeader('quiz', getSection(D,'quiz').name || 'Quiz', getSection(D,'quiz').blurb);
+  const items = (D.quiz||[]).slice(0,3);
   const c = document.getElementById('quiz-container');
-  if (!items.length) { c.innerHTML = `<p class="shelf-msg">No quizzes yet.</p>`; return; }
-  c.innerHTML = `<div class="quiz-grid">${items.map(q => {
-    const ds = q.date ? new Date(q.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+  if (!items.length) { c.innerHTML='<p class="shelf-msg">No quizzes yet.</p>'; return; }
+  c.innerHTML=`<div class="quiz-grid">${items.map(q=>{
+    const ds=q.date?new Date(q.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
     return `<a class="quiz-card fade-in" href="${q.link||'#'}" target="_blank" rel="noopener">
-      ${q.image ? `<img src="${q.image}" class="quiz-img" alt="${q.title}" loading="lazy"/>` : `<div class="quiz-img-ph">🧠</div>`}
+      ${q.image?`<img src="${q.image}" class="quiz-img" alt="${q.title}" loading="lazy"/>`:`<div class="quiz-img-ph">🧠</div>`}
       <div class="quiz-body">
-        ${ds ? `<div class="quiz-date">${ds}</div>` : ''}
+        ${ds?`<div class="quiz-date">${ds}</div>`:''}
         <div class="quiz-title"><span>${q.title}</span><span class="quiz-arrow">↗</span></div>
-        ${q.blurb ? `<p class="quiz-blurb">${q.blurb}</p>` : ''}
-      </div>
-    </a>`;
+        ${q.blurb?`<p class="quiz-blurb">${q.blurb}</p>`:''}
+      </div></a>`;
   }).join('')}</div>`;
   observeFade();
 }
 
 function renderWrite(D) {
-  const sec = getSection(D, 'write');
-  const hdr = document.querySelector('#write .sec-header > div');
-  if (hdr) hdr.innerHTML = `<span class="sec-label">Essays &amp; Writing</span><h2 class="sec-title">${sec.name || 'Write'}</h2>${sec.blurb ? `<p class="sec-blurb">${sec.blurb}</p>` : ''}`;
-
-  // Update "View all" link to point to Substack
+  setSecHeader('write', getSection(D,'write').name || 'Write', getSection(D,'write').blurb);
   const substackUrl = D.contact?.substack || '';
   const viewAll = document.getElementById('write-view-all');
-  if (viewAll) {
-    viewAll.href = substackUrl || '#';
-    viewAll.style.display = substackUrl ? '' : 'none';
-  }
-
+  if (viewAll) { viewAll.href = substackUrl || '#'; viewAll.style.display = substackUrl ? '' : 'none'; }
   loadSubstack(substackUrl);
 }
 
@@ -702,48 +794,23 @@ async function loadSubstack(substackUrl) {
 }
 
 function renderReadingWatchHeaders(D) {
-  // Reading section
   const rs = getSection(D, 'reading');
-  const readInner = document.querySelector('#reading .inner');
-  if (readInner) {
-    const label = readInner.querySelector('.sec-label');
-    const title = readInner.querySelector('.sec-title');
-    if (label) label.textContent = 'Books';
-    if (title) title.textContent = rs.name || 'Reading';
-    // Insert blurb after title if not already there
-    let blurbEl = readInner.querySelector('.sec-blurb');
-    if (rs.blurb) {
-      if (!blurbEl) { blurbEl = document.createElement('p'); blurbEl.className = 'sec-blurb'; title.insertAdjacentElement('afterend', blurbEl); }
-      blurbEl.textContent = rs.blurb;
-    } else if (blurbEl) blurbEl.remove();
-  }
-  // Watch section
+  setSecHeader('reading', rs.name || 'Reading', rs.blurb);
   const ws = getSection(D, 'watch');
-  const watchInner = document.querySelector('#watch .inner');
-  if (watchInner) {
-    const label = watchInner.querySelector('.sec-label');
-    const title = watchInner.querySelector('.sec-title');
-    if (label) label.textContent = 'Videos';
-    if (title) title.textContent = ws.name || 'Watch';
-    let blurbEl = watchInner.querySelector('.sec-blurb');
-    if (ws.blurb) {
-      if (!blurbEl) { blurbEl = document.createElement('p'); blurbEl.className = 'sec-blurb'; title.insertAdjacentElement('afterend', blurbEl); }
-      blurbEl.textContent = ws.blurb;
-    } else if (blurbEl) blurbEl.remove();
-  }
+  setSecHeader('watch', ws.name || 'Watch', ws.blurb);
+  const wls = getSection(D, 'wishlist');
+  setSecHeader('wishlist', wls.name || 'Wishlist', wls.blurb);
 }
 
 function renderContact(D) {
   document.getElementById('contact-note').textContent = D.contact.note || '';
+  const waNumber = (D.contact.whatsapp || '').replace(/\D/g, '');
+  const waIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
   document.getElementById('contact-links').innerHTML = [
-    D.contact.email
-      ? `<a class="contact-chip" href="mailto:${D.contact.email}">✉ ${D.contact.email}</a>`
-      : '',
-    D.contact.linkedin
-      ? `<a class="contact-chip" href="${D.contact.linkedin}" target="_blank" rel="noopener">in LinkedIn</a>`
-      : '',
+    D.contact.email    ? `<a class="contact-chip" href="mailto:${D.contact.email}">✉ ${D.contact.email}</a>` : '',
+    D.contact.linkedin ? `<a class="contact-chip" href="${D.contact.linkedin}" target="_blank" rel="noopener">in LinkedIn</a>` : '',
+    waNumber           ? `<a class="contact-chip" href="https://wa.me/${waNumber}" target="_blank" rel="noopener">${waIcon} WhatsApp</a>` : '',
   ].join('');
-  // Store email for form submission
   window._contactEmail = D.contact.email || '';
 }
 
@@ -752,35 +819,23 @@ function submitContactForm() {
   const email   = document.getElementById('cf-email').value.trim();
   const subject = document.getElementById('cf-subject').value.trim();
   const message = document.getElementById('cf-message').value.trim();
-
   if (!name || !email || !subject || !message) {
-    // Highlight empty fields
     ['cf-name','cf-email','cf-subject','cf-message'].forEach(id => {
       const el = document.getElementById(id);
-      if (!el.value.trim()) {
-        el.style.borderColor = 'rgba(200,82,10,.8)';
-        el.addEventListener('input', () => el.style.borderColor = '', { once: true });
-      }
+      if (!el.value.trim()) { el.style.borderColor='rgba(200,82,10,.8)'; el.addEventListener('input',()=>el.style.borderColor='',{once:true}); }
     });
     return;
   }
-
-  const to   = window._contactEmail || '';
   const sub  = encodeURIComponent(subject);
-  const body = encodeURIComponent(
-    `Hi Samridh,\n\n${message}\n\n— ${name}\n${email}`
-  );
-
-  window.location.href = `mailto:${to}?subject=${sub}&body=${body}`;
+  const body = encodeURIComponent(`Hi Samridh,\n\n${message}\n\n— ${name}\n${email}`);
+  window.location.href = `mailto:${window._contactEmail||''}?subject=${sub}&body=${body}`;
 }
 
 function renderWishlist(D) {
-  const sec = getSection(D, 'wishlist');
-  const hdr = document.querySelector('#wishlist .sec-header > div');
-  if (hdr) hdr.innerHTML = `<span class="sec-label">Wants</span><h2 class="sec-title">${sec.name || 'Wishlist'}</h2>${sec.blurb ? `<p class="sec-blurb">${sec.blurb}</p>` : ''}`;
-  const items = (D.wishlistItems||[]).slice(0, 3);
+  // header handled by renderReadingWatchHeaders
+  const items = (D.wishlistItems||[]).slice(0,3);
   const c = document.getElementById('wishlist-container');
-  if (!items.length) { c.innerHTML=`<p class="shelf-msg">No items yet.</p>`; return; }
+  if (!items.length) { c.innerHTML='<p class="shelf-msg">No items yet.</p>'; return; }
   c.innerHTML=`<div class="wishlist-grid">${items.map(w=>`
     <a class="wish-card fade-in" href="${w.url||'#'}" target="_blank" rel="noopener">
       ${w.image?`<img src="${w.image}" class="wish-img" alt="${w.title}" loading="lazy"/>`:`<div class="wish-img-ph">🎁</div>`}
@@ -815,37 +870,34 @@ async function proxyFetch(url) {
 
 function parseGR(xml) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  // Check for parse error
   if (doc.querySelector('parsererror')) throw new Error('XML parse error');
   return [...doc.querySelectorAll('item')].map(item => {
-    const raw  = item.querySelector('title')?.textContent?.trim() || '';
-    // <link> in RSS is tricky — it's often a text node between elements
-    // Use the <link> element text, or fall back to guid
+    const raw    = item.querySelector('title')?.textContent?.trim() || '';
     const linkEl = item.querySelector('link');
-    const link   = linkEl?.textContent?.trim() ||
-                   item.querySelector('guid')?.textContent?.trim() || '#';
+    const link   = linkEl?.textContent?.trim() || item.querySelector('guid')?.textContent?.trim() || '#';
     const desc   = item.querySelector('description')?.textContent || '';
-
-    // Parse "Title by Author" format
     const byIdx  = raw.lastIndexOf(' by ');
     const title  = byIdx > 0 ? raw.slice(0, byIdx).trim() : raw;
     const author = byIdx > 0 ? raw.slice(byIdx + 4).trim() : '';
-
-    // Extract book cover from HTML inside <description>
-    // Goodreads embeds an <img> tag — parse it from the CDATA
     const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
     let cover = '';
-    if (imgMatch) {
-      // Upsize thumbnail: replace size suffixes like ._SX50_. or ._SY75_. with a larger size
-      cover = imgMatch[1].replace(/\._[A-Z]{2}\d+_\./g, '._SY300_.');
-    }
-
-    return { title, author, cover, link };
+    if (imgMatch) cover = imgMatch[1].replace(/\._[A-Z]{2}\d+_\./g, '._SY300_.');
+    // Rating
+    let rating = 0;
+    const ratingMatch = desc.match(/rated it\s+(\d)\s+of\s+5\s+stars/i) || desc.match(/(\d) of 5 stars/i);
+    if (ratingMatch) rating = parseInt(ratingMatch[1], 10);
+    if (!rating) { const f = (desc.match(/staticStar p10/g)||[]).length; if(f) rating=f; }
+    // Review text
+    let review = '';
+    const plain = desc.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+    const rm = plain.match(/bookshelves:[^\n]*?\s{2,}(.+)$/i) || plain.match(/\d of 5 stars\s{1,}(.+)$/i);
+    if (rm) review = rm[1].replace(/\s*(View all my reviews|Read more).*/i,'').trim();
+    return { title, author, cover, link, rating, review };
   }).filter(b => b.title);
 }
 
 async function loadGoodreads(force=false) {
-  const ck='gr_v4', tk='gr_ts_v4';
+  const ck='gr_v5', tk='gr_ts_v5';
   if (!force) {
     const ts=parseInt(localStorage.getItem(tk)||'0'), raw=localStorage.getItem(ck);
     if (raw&&Date.now()-ts<GR_TTL) { try{grCache=JSON.parse(raw);renderBooks();return;}catch(_){} }
@@ -861,6 +913,13 @@ async function loadGoodreads(force=false) {
   }
 }
 
+function grShelfUrl(shelfId) {
+  return `https://www.goodreads.com/review/list/${GR_USER}?shelf=${shelfId}`;
+}
+function starsHtml(rating) {
+  if (!rating) return '';
+  return `<div class="book-rating">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div>`;
+}
 function renderShelfTabs() {
   document.getElementById('shelf-tabs').innerHTML=GR_SHELVES.map(s=>`
     <button class="shelf-tab${s.id===activeShelf?' active':''}" onclick="switchShelf('${s.id}')">
@@ -871,13 +930,21 @@ function switchShelf(id){activeShelf=id;renderBooks();}
 function renderBooks() {
   renderShelfTabs();
   const books=grCache[activeShelf]||[];
-  if (!books.length){document.getElementById('books-container').innerHTML='<p class="shelf-msg">No books on this shelf.</p>';return;}
-  document.getElementById('books-container').innerHTML=`<div class="books-grid">${books.slice(0,30).map(b=>`
-    <a class="book-card fade-in" href="${b.link}" target="_blank" rel="noopener">
-      ${b.cover?`<img src="${b.cover}" class="book-cover" alt="${b.title}" loading="lazy" onerror="this.outerHTML='<div class=book-cover-ph>📚</div>'"/>` : `<div class="book-cover-ph">📚</div>`}
-      <div class="book-title">${b.title}</div>
-      ${b.author?`<div class="book-author">${b.author}</div>`:''}
-    </a>`).join('')}</div>`;
+  const c=document.getElementById('books-container');
+  if (!books.length){c.innerHTML='<p class="shelf-msg">No books on this shelf.</p>';return;}
+  const shown=books.slice(0,5);
+  c.innerHTML=`
+    <div class="books-grid">
+      ${shown.map(b=>`
+        <a class="book-card fade-in" href="${b.link}" target="_blank" rel="noopener">
+          ${b.cover?`<img src="${b.cover}" class="book-cover" alt="${b.title}" loading="lazy" onerror="this.outerHTML='<div class=book-cover-ph>📚</div>'"/>`:`<div class="book-cover-ph">📚</div>`}
+          <div class="book-title">${b.title}</div>
+          ${b.author?`<div class="book-author">${b.author}</div>`:''}
+          ${starsHtml(b.rating)}
+          ${b.review?`<div class="book-review">"${b.review}"</div>`:''}
+        </a>`).join('')}
+    </div>
+    <a class="books-view-all" href="${grShelfUrl(activeShelf)}" target="_blank" rel="noopener">View all on Goodreads ↗</a>`;
   observeFade();
 }
 
