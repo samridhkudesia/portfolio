@@ -110,6 +110,8 @@ exports.handler = async (event) => {
       role:       t.role       || '',
       subtext:    t.subtext    || '',
       website:    t.website    || '',
+      logo:       t.logo       || '',
+      type:       t.type       || 'work',
       start_date: t.startDate  || '',
       end_date:   t.endDate    || '',
       duration:   t.duration   || '',

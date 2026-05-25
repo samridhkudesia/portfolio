@@ -157,13 +157,31 @@
     #hero.has-bg-image::after { content:''; position:absolute; inset:0; background:rgba(245,240,232,0.72); pointer-events:none; }
 
     /* CONTACT */
-    #contact { background:var(--ink); color:var(--sand); padding:5rem 2rem; text-align:center; }
-    #contact .sec-label { color:var(--accent); }
-    #contact .sec-title { color:var(--sand); }
-    .contact-grid { display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap; margin-top:2rem; }
-    .contact-chip { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; border:1.5px solid rgba(245,240,232,.2); border-radius:99px; color:var(--sand); text-decoration:none; font-size:0.88rem; transition:all .2s; }
+    #contact { background:var(--ink); color:var(--sand); padding:5rem 2rem; }
+    #contact .sec-title { color:var(--sand); text-align:center; margin-bottom:0.5rem; }
+    .contact-note { text-align:center; margin-bottom:3rem; font-size:0.88rem; color:rgba(245,240,232,.45); font-style:italic; }
+    .contact-chips { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
+    .contact-chip { display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1.2rem; border:1.5px solid rgba(245,240,232,.15); border-radius:99px; color:rgba(245,240,232,.7); text-decoration:none; font-size:0.82rem; transition:all .2s; }
     .contact-chip:hover { border-color:var(--accent); color:#fff; background:rgba(200,82,10,.15); }
-    .contact-note { margin-top:1.2rem; font-size:0.88rem; color:rgba(245,240,232,.45); font-style:italic; }
+    /* Form */
+    .contact-form { max-width:560px; margin:0 auto; }
+    .cf-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .cf-field { display:flex; flex-direction:column; gap:0.35rem; margin-bottom:1rem; }
+    .cf-field label { font-size:0.68rem; font-weight:500; letter-spacing:0.09em; text-transform:uppercase; color:rgba(245,240,232,.4); }
+    .cf-field input, .cf-field textarea {
+      width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+      border-radius:8px; padding:0.65rem 0.9rem; color:var(--sand);
+      font-family:var(--sans); font-size:0.9rem; outline:none; resize:none;
+      transition:border-color .2s, background .2s;
+    }
+    .cf-field input::placeholder, .cf-field textarea::placeholder { color:rgba(245,240,232,.25); }
+    .cf-field input:focus, .cf-field textarea:focus { border-color:rgba(200,82,10,.6); background:rgba(255,255,255,.08); }
+    .cf-field textarea { min-height:130px; line-height:1.6; }
+    .cf-submit { width:100%; padding:0.8rem; background:var(--accent); color:#fff; border:none; border-radius:99px; font-family:var(--sans); font-size:0.9rem; font-weight:500; cursor:pointer; transition:background .2s, transform .15s; margin-top:0.25rem; }
+    .cf-submit:hover { background:#a8420a; transform:translateY(-1px); }
+    .cf-submit:active { transform:none; }
+    .cf-notice { text-align:center; font-size:0.75rem; color:rgba(245,240,232,.25); margin-top:0.9rem; line-height:1.6; }
+    @media (max-width:560px) { .cf-row { grid-template-columns:1fr; } }
 
     footer { background:var(--ink); border-top:1px solid rgba(255,255,255,.06); padding:1.2rem 2rem; text-align:center; font-size:0.75rem; color:rgba(245,240,232,.3); letter-spacing:0.04em; }
     .view-all { font-size:0.78rem; font-weight:500; color:var(--accent); text-decoration:none; border:1.5px solid var(--accent); border-radius:99px; padding:4px 14px; transition:all .2s; white-space:nowrap; flex-shrink:0; }
@@ -300,10 +318,31 @@
 
   <section id="contact">
     <div class="inner">
-      <span class="sec-label">Let's Talk</span>
       <h2 class="sec-title">Get in Touch</h2>
-      <div class="contact-grid" id="contact-links"></div>
       <p class="contact-note" id="contact-note"></p>
+      <div class="contact-chips" id="contact-links"></div>
+      <div class="contact-form">
+        <div class="cf-row">
+          <div class="cf-field">
+            <label for="cf-name">Your Name</label>
+            <input id="cf-name" type="text" placeholder="Jane Smith" autocomplete="name" />
+          </div>
+          <div class="cf-field">
+            <label for="cf-email">Your Email</label>
+            <input id="cf-email" type="email" placeholder="jane@example.com" autocomplete="email" />
+          </div>
+        </div>
+        <div class="cf-field">
+          <label for="cf-subject">Subject</label>
+          <input id="cf-subject" type="text" placeholder="What's this about?" />
+        </div>
+        <div class="cf-field">
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" placeholder="Write your message here…"></textarea>
+        </div>
+        <button class="cf-submit" onclick="submitContactForm()">Send Message ↗</button>
+        <p class="cf-notice">Opens your email client with everything pre-filled.</p>
+      </div>
     </div>
   </section>
 </main>
@@ -695,10 +734,44 @@ function renderReadingWatchHeaders(D) {
 }
 
 function renderContact(D) {
-  document.getElementById('contact-note').textContent = D.contact.note;
-  document.getElementById('contact-links').innerHTML = `
-    <a class="contact-chip" href="mailto:${D.contact.email}">✉ ${D.contact.email}</a>
-    <a class="contact-chip" href="${D.contact.linkedin}" target="_blank" rel="noopener">in LinkedIn</a>`;
+  document.getElementById('contact-note').textContent = D.contact.note || '';
+  document.getElementById('contact-links').innerHTML = [
+    D.contact.email
+      ? `<a class="contact-chip" href="mailto:${D.contact.email}">✉ ${D.contact.email}</a>`
+      : '',
+    D.contact.linkedin
+      ? `<a class="contact-chip" href="${D.contact.linkedin}" target="_blank" rel="noopener">in LinkedIn</a>`
+      : '',
+  ].join('');
+  // Store email for form submission
+  window._contactEmail = D.contact.email || '';
+}
+
+function submitContactForm() {
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const subject = document.getElementById('cf-subject').value.trim();
+  const message = document.getElementById('cf-message').value.trim();
+
+  if (!name || !email || !subject || !message) {
+    // Highlight empty fields
+    ['cf-name','cf-email','cf-subject','cf-message'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.style.borderColor = 'rgba(200,82,10,.8)';
+        el.addEventListener('input', () => el.style.borderColor = '', { once: true });
+      }
+    });
+    return;
+  }
+
+  const to   = window._contactEmail || '';
+  const sub  = encodeURIComponent(subject);
+  const body = encodeURIComponent(
+    `Hi Samridh,\n\n${message}\n\n— ${name}\n${email}`
+  );
+
+  window.location.href = `mailto:${to}?subject=${sub}&body=${body}`;
 }
 
 function renderWishlist(D) {

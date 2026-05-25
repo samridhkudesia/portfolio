@@ -522,10 +522,10 @@ document.getElementById('l-email').addEventListener('keydown',e=>{if(e.key==='En
 const DEFAULT_DATA={
   hero:{name:"Samridh Kudesia",photo:"",tagline:"Product thinker building at the intersection of AI, education, and consumer tech.",links:{linkedin:"https://www.linkedin.com/in/samridhkudesia/",email:"samridh@gmail.com"}},
   timeline:[
-    {id:"1",company:"Park+",role:"Product Manager",subtext:"Building India's mobility future, one parking spot at a time.",website:"https://parkplus.io",startDate:"2022",endDate:"Present",duration:"2+ yrs",bullets:["Led product strategy for India's largest parking & mobility super-app","Owned CRM and mobile app roadmap serving millions of urban users"]},
-    {id:"2",company:"Plaksha University",role:"Founders' Office — Program Lead",subtext:"Helping reimagine what a technology university could look like in India.",website:"https://plaksha.edu.in",startDate:"2021",endDate:"2022",duration:"~1 yr",bullets:["Worked in the Founders' Office helping build a next-generation tech university","Spearheaded launch of a quality AI/ML program for advanced tech education"]},
-    {id:"3",company:"Leap Finance",role:"Associate",subtext:"Making international education financially accessible for Indian students.",website:"https://leapfinance.com",startDate:"2020",endDate:"2021",duration:"~1 yr",bullets:["Contributed to fintech product and operations at a leading EdFintech startup"]},
-    {id:"4",company:"Kuar — Koç University Arçelik Research Center",role:"Research Intern",subtext:"Exploring the intersection of design, creativity, and human-computer interaction.",website:"https://kuar.ku.edu.tr",startDate:"2019",endDate:"2020",duration:"~1 yr",bullets:["Conducted research in creative industries and human-computer interaction"]}
+    {id:"1",type:"work",company:"Park+",role:"Product Manager",subtext:"Sequoia-funded · Automating platform workflows across finance, operations and sales.",website:"https://parkplus.io",logo:"",startDate:"Dec 2024",endDate:"Present",duration:"~6 mo",bullets:["<strong>Product Discovery:</strong> Led 10 engineers across 3 platform services to automate ~90% of B2B invoices (previously manual). Improved UX driving a <strong>75% reduction</strong> in daily product issues.","<strong>Stakeholder Management:</strong> Pitched product roadmap to align business leads; shipped Virtual Accounts (<strong>unclaimed revenue 5→2 Cr</strong>) and Late Fee (<strong>unpaid invoices ↓30%</strong>)."]},
+    {id:"2",type:"work",company:"LeapFinance",role:"Associate Product Manager",subtext:"Sequoia-funded · First PM at an early-stage edtech helping Indian students study abroad.",website:"https://leapscholar.com",logo:"",startDate:"2022",endDate:"Dec 2024",duration:"2 yrs",bullets:["<strong>Growth:</strong> Launched a Clubhouse-style spoken-English product, breaking linear class capacity limits. Grew <strong>DAU 1,200→10,000</strong> with zero additional marketing spend.","<strong>Retention:</strong> Pivoted from knowledge-delivery to practice-oriented learning (Duolingo-style UX). <strong>D7 retention 7%→18%</strong> — a 2.5× jump.","<strong>Monetization:</strong> Automated IELTS mock test evaluation via AI APIs. TAT <strong>1 day→2 min</strong>, daily evaluations <strong>20→200</strong>, revenue <strong>₹4K→₹1L/day</strong>.","<strong>App Store:</strong> Analysed 2,000+ reviews; introduced smart nudges at moments of delight. <strong>Play Store rating 4.1→4.5</strong> in 2 months.","<strong>Cost Containment:</strong> Promoted top community users to pro-bono evaluators via social incentives. Maintained 4.3/5 NPS at <strong>1/3rd the cost</strong>."]},
+    {id:"3",type:"work",company:"Plaksha University",role:"Product Associate, Founders' Office",subtext:"5-member strategy team working with 80+ global CxOs to launch a new-age tech university.",website:"https://plaksha.edu.in",logo:"",startDate:"2019",endDate:"2022",duration:"2 yrs 6 mo",bullets:["<strong>Product Development:</strong> Drafted PRDs, designed wireframes, coordinated with devs to launch an applications & scholarships portal from scratch in 2 months — <strong>1,000+ applications</strong>.","<strong>Go-to-market:</strong> Set up digital campaigns for a new ₹10L product — <strong>60 sales</strong>.","<strong>Sales:</strong> Pitched 50+ organisations (Arcesium, BCG, IBM, Microsoft, Fractal) in 2 months to offer <strong>60+ student internships</strong>."]},
+    {id:"4",type:"education",company:"Ashoka University",role:"B.Sc. (Hons.) Computer Science + Politics",subtext:"<5% acceptance rate · CGPA 3.2/4.0 · 75% Merit Scholarship",website:"https://ashoka.edu.in",logo:"",startDate:"2015",endDate:"2019",duration:"4 yrs",bullets:["Google & Microsoft sponsored India delegate to tech policy forums in <strong>Paris</strong> (Internet Society) and <strong>Seoul</strong> (ICANN APIGA).","Winner, <strong>TATA Crucible Business Quiz</strong> · Elected: Student Council, Placement Cell · President: Quiz Society.","Built a Java course-allocation algorithm replacing first-come-first-serve; adopted after pilot — benefits <strong>5,000+ students annually</strong>.","One of only 2 Indians awarded a <strong>Fellowship at Koç University, Istanbul</strong> — researched audio frameworks for ambient sound manipulation."]},
   ],
   resume:{label:"Download Resume",url:"https://drive.google.com/file/d/13_X6XgvUpGSUbbPtPZZlA-gJSnFkPfj1/view?usp=drive_link"},
   projects:[
@@ -594,14 +594,16 @@ async function loadData(){
       goodreads:  { userId: '20847060' },
       timeline: timeline.map(t => ({
         id:        t.id,
-        company:   t.company   || '',
-        role:      t.role      || '',
-        subtext:   t.subtext   || '',
-        website:   t.website   || '',
-        startDate: t.start_date|| '',
-        endDate:   t.end_date  || '',
-        duration:  t.duration  || '',
-        bullets:   t.bullets   || [],
+        company:   t.company    || '',
+        role:      t.role       || '',
+        subtext:   t.subtext    || '',
+        website:   t.website    || '',
+        logo:      t.logo       || '',
+        type:      t.type       || 'work',
+        startDate: t.start_date || '',
+        endDate:   t.end_date   || '',
+        duration:  t.duration   || '',
+        bullets:   t.bullets    || [],
       })),
       projects: projects.map(p => ({
         id:          p.id,
@@ -661,7 +663,11 @@ function hydrate(){
   if(!DATA.goodreads)DATA.goodreads={userId:'20847060'};
   if(!DATA.contact)DATA.contact={};
   if(DATA.contact.substack===undefined)DATA.contact.substack='';
-  DATA.timeline.forEach(t=>{if(t.subtext===undefined)t.subtext='';});
+  DATA.timeline.forEach(t => {
+    if (t.subtext === undefined) t.subtext = '';
+    if (t.logo   === undefined) t.logo    = '';
+    if (t.type   === undefined) t.type    = 'work';
+  });
 }
 function clone(o){return JSON.parse(JSON.stringify(o));}
 
@@ -819,6 +825,17 @@ function renderTLCards(){
         <div class="field"><label>Company</label><input type="text" value="${esc(item.company)}" oninput="updateTL(${i},'company',this.value)"/></div>
         <div class="field"><label>Role</label><input type="text" value="${esc(item.role)}" oninput="updateTL(${i},'role',this.value)"/></div>
       </div>
+      <div class="field-row">
+        <div class="field"><label>Type</label>
+          <select oninput="updateTL(${i},'type',this.value)">
+            <option value="work" ${(item.type||'work')==='work'?'selected':''}>Work</option>
+            <option value="education" ${item.type==='education'?'selected':''}>Education</option>
+          </select>
+        </div>
+        <div class="field"><label>Logo URL <span style="font-weight:400;font-size:.8em;color:var(--muted2)">(optional)</span></label>
+          <input type="text" value="${esc(item.logo||'')}" oninput="updateTL(${i},'logo',this.value)" placeholder="https://… (auto from website if blank)"/>
+        </div>
+      </div>
       <div class="field"><label>Subtext (italic)</label><input type="text" value="${esc(item.subtext)}" oninput="updateTL(${i},'subtext',this.value)" placeholder="One-line context…"/></div>
       <div class="field"><label>Website</label><input type="text" value="${esc(item.website)}" oninput="updateTL(${i},'website',this.value)"/></div>
       <div class="field-row">
@@ -833,7 +850,7 @@ function updateTL(i,k,v){DATA.timeline[i][k]=v;document.querySelector(`[data-tl=
 function updateTLBullets(i,v){DATA.timeline[i].bullets=v.split('\n').filter(l=>l.trim());markDirty();}
 function moveTL(i,d){[DATA.timeline[i],DATA.timeline[i+d]]=[DATA.timeline[i+d],DATA.timeline[i]];renderTLCards();markDirty();}
 function removeTL(i){if(!confirm('Remove?'))return;DATA.timeline.splice(i,1);renderTLCards();markDirty();}
-function addTL(){DATA.timeline.push({id:Date.now().toString(),company:'',role:'',subtext:'',website:'',startDate:'',endDate:'Present',duration:'',bullets:['']});renderTLCards();markDirty();}
+function addTL(){DATA.timeline.push({id:Date.now().toString(),company:'',role:'',subtext:'',website:'',logo:'',type:'work',startDate:'',endDate:'Present',duration:'',bullets:['']});renderTLCards();markDirty();}
 
 // ═══════════════════════════════════════
 //  PROJECTS

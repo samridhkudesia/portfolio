@@ -64,7 +64,7 @@ async function boot(){
   try{
     const [cfg,items]=await Promise.all([
       sbGet(url,anon,'site_config','?id=eq.main&select=hero'),
-      sbGet(url,anon,'wishlist_items','?order=position.asc'),
+      sbGet(url,anon,'wishlist_items','?order=updated_at.desc'),
     ]);
     const name=cfg[0]?.hero?.name||'Samridh Kudesia';
     document.getElementById('nav-name').textContent=name;
