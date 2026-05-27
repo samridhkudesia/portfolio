@@ -63,25 +63,26 @@
     .tl-section-divider { display:flex; align-items:center; gap:1rem; margin:2rem 0 2.2rem; }
     .tl-section-divider-line { flex:1; height:1px; background:var(--rule); }
     .tl-section-label { font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
-    .timeline { position:relative; padding-left:52px; }
+    .timeline { position:relative; padding-left:64px; }
     .timeline::before { content:''; position:absolute; left:20px; top:4px; bottom:4px; width:2px; background:linear-gradient(to bottom,var(--accent) 0%,var(--accent2) 60%,var(--rule) 100%); border-radius:2px; }
     .tl-item { position:relative; padding-bottom:3rem; }
     .tl-item:last-child { padding-bottom:0; }
-    .tl-logo-wrap { position:absolute; left:-52px; top:0; width:42px; height:42px; border-radius:10px; background:#fff; border:1.5px solid var(--rule); box-shadow:0 2px 8px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
+    .tl-logo-wrap { position:absolute; left:-60px; top:0; width:50px; height:50px; border-radius:12px; background:#fff; border:1.5px solid var(--rule); box-shadow:0 2px 10px rgba(0,0,0,.10); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
     .tl-logo-wrap.edu { background:var(--warm); border-color:var(--accent2); }
-    .tl-logo { width:28px; height:28px; object-fit:contain; display:block; }
-    .tl-logo-fallback { font-size:1.1rem; line-height:1; }
-    .tl-connector { position:absolute; left:-31px; top:20px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--card); box-shadow:0 0 0 2px var(--accent); }
+    .tl-logo { width:36px; height:36px; object-fit:contain; display:block; }
+    .tl-logo-fallback { font-size:1.3rem; line-height:1; font-weight:700; color:var(--muted); }
+    .tl-connector { position:absolute; left:-35px; top:24px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--card); box-shadow:0 0 0 2px var(--accent); }
     .tl-item.edu .tl-connector { background:var(--accent2); box-shadow:0 0 0 2px var(--accent2); }
     .tl-card { background:var(--sand); border:1px solid var(--rule); border-radius:12px; padding:1.2rem 1.4rem; transition:box-shadow .2s; }
     .tl-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.07); }
     .tl-item.edu .tl-card { border-color:rgba(42,107,92,.18); background:rgba(42,107,92,.03); }
-    .tl-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.3rem; }
-    .tl-company { font-family:var(--serif); font-size:1.05rem; font-weight:700; color:var(--ink); text-decoration:none; line-height:1.2; }
-    .tl-company:hover { color:var(--accent); }
+    .tl-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.2rem; }
+    .tl-role-heading { font-family:var(--serif); font-size:1.08rem; font-weight:700; color:var(--ink); line-height:1.2; }
     .tl-dates { font-size:0.72rem; color:var(--muted); white-space:nowrap; flex-shrink:0; margin-top:3px; letter-spacing:0.02em; }
-    .tl-role { display:inline-block; font-size:0.8rem; font-weight:500; color:var(--accent2); background:rgba(42,107,92,.08); padding:2px 10px; border-radius:99px; margin-bottom:0.55rem; }
-    .tl-item.edu .tl-role { color:var(--accent); background:rgba(200,82,10,.07); }
+    .tl-company { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.8rem; font-weight:500; color:var(--accent2); text-decoration:none; margin-bottom:0.4rem; transition:color .18s; }
+    .tl-company:hover { color:var(--accent); }
+    .tl-item.edu .tl-company { color:var(--accent); }
+    .tl-company-arrow { font-size:0.7rem; opacity:0.6; }
     .tl-subtext { font-size:0.85rem; color:var(--muted); font-style:italic; margin-bottom:0.65rem; line-height:1.5; }
     .tl-bullets { padding-left:1.1rem; margin:0; }
     .tl-bullets li { font-size:0.865rem; color:var(--muted); margin-bottom:0.3rem; line-height:1.6; }
@@ -543,13 +544,14 @@ function buildFallback() {
     visibility: { experience:true, projects:true, quiz:true, write:true, reading:true, watch:true, wishlist:true, contact:true },
     timeline: [
       { id:'1', type:'work', company:'Park+', role:'Product Manager', subtext:'Sequoia-funded · Automating platform workflows across finance, operations and sales.', website:'https://parkplus.io', logo:'', startDate:'Dec 2024', endDate:'Present', duration:'~6 mo', bullets:['<strong>Product Discovery:</strong> Led 10 engineers across 3 platform services to automate ~90% of B2B invoices. Improved UX driving a <strong>75% reduction</strong> in daily product issues.','<strong>Stakeholder Management:</strong> Shipped Virtual Accounts (<strong>unclaimed revenue 5→2 Cr</strong>) and Late Fee (<strong>unpaid invoices ↓30%</strong>).'] },
-      { id:'2', type:'work', company:'LeapFinance', role:'Associate Product Manager', subtext:'Sequoia-funded · First PM at an early-stage edtech helping Indian students study abroad.', website:'https://leapscholar.com', logo:'', startDate:'2022', endDate:'Dec 2024', duration:'2 yrs', bullets:['<strong>Growth:</strong> Launched a Clubhouse-style spoken-English product. Grew <strong>DAU 1,200→10,000</strong> with zero additional marketing spend.','<strong>Retention:</strong> Pivoted to practice-oriented learning (Duolingo-style UX). <strong>D7 retention 7%→18%</strong> — a 2.5× jump.','<strong>Monetization:</strong> Automated IELTS evaluation via AI APIs. TAT <strong>1 day→2 min</strong>, revenue <strong>₹4K→₹1L/day</strong>.','<strong>App Store:</strong> Analysed 2,000+ reviews; smart nudges at moments of delight. <strong>Play Store rating 4.1→4.5</strong> in 2 months.','<strong>Cost Containment:</strong> Pro-bono evaluator programme. Maintained 4.3/5 NPS at <strong>1/3rd the cost</strong>.'] },
-      { id:'3', type:'work', company:'Plaksha University', role:"Product Associate, Founders' Office", subtext:'5-member strategy team working with 80+ global CxOs to launch a new-age tech university.', website:'https://plaksha.edu.in', logo:'', startDate:'2019', endDate:'2022', duration:'2 yrs 6 mo', bullets:['<strong>Product Development:</strong> Launched applications & scholarships portal in 2 months — <strong>1,000+ applications</strong>.','<strong>Go-to-market:</strong> Digital campaigns for a new ₹10L product — <strong>60 sales</strong>.','<strong>Sales:</strong> Pitched 50+ organisations (BCG, IBM, Microsoft) to offer <strong>60+ student internships</strong>.'] },
-      { id:'4', type:'education', company:'Ashoka University', role:'B.Sc. (Hons.) Computer Science + Politics', subtext:'<5% acceptance rate · CGPA 3.2/4.0 · 75% Merit Scholarship', website:'https://ashoka.edu.in', logo:'', startDate:'2015', endDate:'2019', duration:'4 yrs', bullets:['Google & Microsoft sponsored India delegate to tech policy forums in <strong>Paris</strong> and <strong>Seoul</strong> (ICANN APIGA).','Winner, <strong>TATA Crucible Business Quiz</strong> · Elected: Student Council, Placement Cell · President: Quiz Society.','Java course-allocation algorithm adopted after pilot — benefits <strong>5,000+ students annually</strong>.','One of 2 Indians awarded <strong>Fellowship at Koç University, Istanbul</strong> — researched audio frameworks.'] },
+      { id:'2', type:'work', company:'LeapFinance', role:'Associate Product Manager', subtext:'Sequoia-funded · First PM at an early-stage edtech helping Indian students study abroad.', website:'https://leapscholar.com', logo:'', startDate:'2022', endDate:'Dec 2024', duration:'2 yrs', bullets:['<strong>Growth:</strong> Escaped linear class capacity limits by launching a Clubhouse-style community-driven spoken-English product. Grew <strong>DAU 1,200→10,000</strong> with zero additional marketing spend.','<strong>Retention:</strong> Pivoted from knowledge-delivery to practice-oriented learning (Duolingo-style UX). <strong>D7 retention 7%→18%</strong> — a 2.5× jump.','<strong>Monetization:</strong> Automated IELTS evaluation via AI APIs. TAT <strong>1 day→2 min</strong>, evaluations <strong>20→200/day</strong>, revenue <strong>₹4K→₹1L/day</strong>.','<strong>App Store:</strong> Analysed 2,000+ reviews; smart nudges at moments of delight. <strong>Play Store rating 4.1→4.5</strong> in 2 months.','<strong>Cost Containment:</strong> Pro-bono evaluator programme via social incentives. Same NPS (4.3/5) at <strong>1/3rd the cost</strong>.'] },
+      { id:'3', type:'work', company:'Plaksha University', role:"Product Associate, Founders' Office", subtext:'5-member strategy team working with 80+ global CxOs to launch a new-age tech university.', website:'https://plaksha.edu.in', logo:'', startDate:'2019', endDate:'2022', duration:'2 yrs 6 mo', bullets:['<strong>Product Development:</strong> Launched applications & scholarships portal from scratch in 2 months — <strong>1,000+ applications</strong>.','<strong>Go-to-market:</strong> Digital campaigns for a new ₹10L product — <strong>60 sales</strong>.','<strong>Sales:</strong> Pitched 50+ organisations (BCG, IBM, Microsoft) to offer <strong>60+ student internships</strong>.'] },
+      { id:'4', type:'education', company:'Ashoka University', role:'B.Sc. (Hons.) Computer Science + Politics', subtext:'<5% acceptance rate · CGPA 3.2/4.0 · 75% Merit Scholarship', website:'https://ashoka.edu.in', logo:'', startDate:'2015', endDate:'2019', duration:'4 yrs', bullets:['Google & Microsoft sponsored India delegate to tech policy forums in <strong>Paris</strong> (Internet Society) and <strong>Seoul</strong> (ICANN APIGA).','Winner, <strong>TATA Crucible Business Quiz</strong> · Elected: Student Council, Placement Cell · President: Quiz Society.','Java course-allocation algorithm adopted after pilot — benefits <strong>5,000+ students annually</strong>.','One of 2 Indians awarded <strong>Fellowship at Koç University, Istanbul</strong> — researched audio frameworks for ambient sound manipulation.'] },
     ],
     projects: [
-      { id:'1', title:'Park+ Mobility Super-App', description:'Led product for India\'s largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users.', url:'https://parkplus.io', image:'', tags:['Product','Mobile','Mobility'] },
-      { id:'2', title:'Plaksha AI/ML Program', description:'Designed and launched a rigorous AI/ML curriculum at Plaksha University.', url:'https://plaksha.edu.in', image:'', tags:['Education','AI','Program Design'] },
+      { id:'1', title:'Park+ Mobility Super-App', description:'Led product for India\'s largest parking platform — FASTag, EV charging, and parking discovery for 10M+ users. Automated ~90% of B2B invoices and drove a 75% reduction in daily product issues.', url:'https://parkplus.io', image:'', tags:['Product','Mobile','Mobility'] },
+      { id:'2', title:'LeapScholar Spoken English', description:'Launched a Clubhouse-style community product. Grew DAU from 1,200 to 10,000 with zero additional marketing spend. D7 retention improved 2.5× to 18%.', url:'https://leapscholar.com', image:'', tags:['EdTech','Growth','Retention'] },
+      { id:'3', title:'Plaksha University Launch', description:'5-member founding team working with 80+ global CxOs to launch a new-age tech university. Built applications portal from scratch in 2 months, generating 1,000+ applications.', url:'https://plaksha.edu.in', image:'', tags:['Education','0→1','Strategy'] },
     ],
     quiz: [], write: [], wishlistItems: [],
     sections: [
@@ -662,10 +664,12 @@ function renderTimeline(D) {
         <div class="tl-connector"></div>
         <div class="tl-card">
           <div class="tl-top">
-            <a class="tl-company" href="${safeUrl(item.website)}" target="_blank" rel="noopener">${item.company}</a>
+            <div class="tl-role-heading">${item.role}</div>
             ${dateStr ? `<span class="tl-dates">${dateStr}</span>` : ''}
           </div>
-          <span class="tl-role">${item.role}</span>
+          <a class="tl-company" href="${safeUrl(item.website)}" target="_blank" rel="noopener">
+            ${item.company}<span class="tl-company-arrow">↗</span>
+          </a>
           ${item.subtext ? `<p class="tl-subtext">${item.subtext}</p>` : ''}
           ${item.bullets?.length ? `<ul class="tl-bullets">${item.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
         </div>
@@ -819,16 +823,18 @@ function submitContactForm() {
   const email   = document.getElementById('cf-email').value.trim();
   const subject = document.getElementById('cf-subject').value.trim();
   const message = document.getElementById('cf-message').value.trim();
+  const fields  = ['cf-name','cf-email','cf-subject','cf-message'];
   if (!name || !email || !subject || !message) {
-    ['cf-name','cf-email','cf-subject','cf-message'].forEach(id => {
+    fields.forEach(id => {
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.style.borderColor='rgba(200,82,10,.8)'; el.addEventListener('input',()=>el.style.borderColor='',{once:true}); }
     });
     return;
   }
+  const toEmail = window._contactEmail || 'samridh@gmail.com';
   const sub  = encodeURIComponent(subject);
-  const body = encodeURIComponent(`Hi Samridh,\n\n${message}\n\n— ${name}\n${email}`);
-  window.location.href = `mailto:${window._contactEmail||''}?subject=${sub}&body=${body}`;
+  const body = encodeURIComponent(`Hi,\n\n${message}\n\n— ${name}\n${email}`);
+  window.open(`mailto:${toEmail}?subject=${sub}&body=${body}`, '_self');
 }
 
 function renderWishlist(D) {
@@ -882,16 +888,26 @@ function parseGR(xml) {
     const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
     let cover = '';
     if (imgMatch) cover = imgMatch[1].replace(/\._[A-Z]{2}\d+_\./g, '._SY300_.');
-    // Rating
+    // Rating — try multiple patterns
     let rating = 0;
-    const ratingMatch = desc.match(/rated it\s+(\d)\s+of\s+5\s+stars/i) || desc.match(/(\d) of 5 stars/i);
-    if (ratingMatch) rating = parseInt(ratingMatch[1], 10);
-    if (!rating) { const f = (desc.match(/staticStar p10/g)||[]).length; if(f) rating=f; }
-    // Review text
+    const starMatch = (desc.match(/staticStar p10/g)||[]).length;
+    if (starMatch) rating = starMatch;
+    if (!rating) {
+      const rm = desc.match(/rated it\s+(\d)\s+of\s+5\s+stars/i) || desc.match(/(\d)\s+of\s+5\s+stars/i);
+      if (rm) rating = parseInt(rm[1], 10);
+    }
+    // Review text — strip HTML and extract meaningful text
     let review = '';
-    const plain = desc.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
-    const rm = plain.match(/bookshelves:[^\n]*?\s{2,}(.+)$/i) || plain.match(/\d of 5 stars\s{1,}(.+)$/i);
-    if (rm) review = rm[1].replace(/\s*(View all my reviews|Read more).*/i,'').trim();
+    const plain = desc
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#\d+;/g,' ')
+      .replace(/\s+/g,' ').trim();
+    // Find text after rating line or bookshelves line
+    const reviewMatch = plain.match(/(?:bookshelves:[^\n]*?|stars?)\s{1,}(.{20,})/i);
+    if (reviewMatch) {
+      review = reviewMatch[1].replace(/\s*(View all my reviews|Read more)\s*/i,'').trim().slice(0, 200);
+    }
     return { title, author, cover, link, rating, review };
   }).filter(b => b.title);
 }
@@ -940,7 +956,7 @@ function renderBooks() {
           ${b.cover?`<img src="${b.cover}" class="book-cover" alt="${b.title}" loading="lazy" onerror="this.outerHTML='<div class=book-cover-ph>📚</div>'"/>`:`<div class="book-cover-ph">📚</div>`}
           <div class="book-title">${b.title}</div>
           ${b.author?`<div class="book-author">${b.author}</div>`:''}
-          ${starsHtml(b.rating)}
+          ${b.rating?starsHtml(b.rating):''}
           ${b.review?`<div class="book-review">"${b.review}"</div>`:''}
         </a>`).join('')}
     </div>
