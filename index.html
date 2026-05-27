@@ -888,32 +888,60 @@ function parseGR(xml) {
     const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
     let cover = '';
     if (imgMatch) cover = imgMatch[1].replace(/\._[A-Z]{2}\d+_\./g, '._SY300_.');
-    // Rating — try multiple patterns
+
+    // ── Rating: count filled staticStar images in the description HTML ──────
+    // Goodreads uses <img src="…/stars/red_star.png"> or staticStar p10 spans
     let rating = 0;
-    const starMatch = (desc.match(/staticStar p10/g)||[]).length;
-    if (starMatch) rating = starMatch;
+    // Method 1: count "p10" (filled) static-star spans
+    const p10 = (desc.match(/staticStar p10/g) || []).length;
+    if (p10 >= 1 && p10 <= 5) { rating = p10; }
+    // Method 2: explicit "rated it X of 5 stars" text
     if (!rating) {
-      const rm = desc.match(/rated it\s+(\d)\s+of\s+5\s+stars/i) || desc.match(/(\d)\s+of\s+5\s+stars/i);
-      if (rm) rating = parseInt(rm[1], 10);
+      const rm = desc.match(/rated it[^<]*?(\d)\s*of\s*5\s*stars/i)
+              || desc.match(/(\d)\s*of\s*5\s*stars/i)
+              || desc.match(/\brating:\s*(\d)/i);
+      if (rm) rating = Math.min(5, Math.max(1, parseInt(rm[1], 10)));
     }
-    // Review text — strip HTML and extract meaningful text
+    // Method 3: count red/orange star images (src contains "red_star" or filled star)
+    if (!rating) {
+      const starImgs = (desc.match(/src="[^"]*(?:red_star|star_full|filled)[^"]*"/g) || []).length;
+      if (starImgs >= 1 && starImgs <= 5) rating = starImgs;
+    }
+
+    // ── Review: strip HTML and extract text after known delimiter lines ──────
     let review = '';
-    const plain = desc
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g,' ')
-      .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#\d+;/g,' ')
-      .replace(/\s+/g,' ').trim();
-    // Find text after rating line or bookshelves line
-    const reviewMatch = plain.match(/(?:bookshelves:[^\n]*?|stars?)\s{1,}(.{20,})/i);
-    if (reviewMatch) {
-      review = reviewMatch[1].replace(/\s*(View all my reviews|Read more)\s*/i,'').trim().slice(0, 200);
+    // Decode common HTML entities first
+    const decoded = desc
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+    // Strip style/script blocks
+    const noStyle = decoded.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                           .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    // Strip all remaining tags
+    const plain = noStyle.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    // Goodreads descriptions typically end with: "…bookshelves: X\n\nREVIEW TEXT\n\nView all my reviews"
+    const afterShelves = plain.match(/bookshelves:[^\n\r]*[\n\r\s]+(.{15,})/i);
+    if (afterShelves) {
+      review = afterShelves[1]
+        .replace(/\s*(View all my reviews|Read more\.?)\s*$/i, '')
+        .trim().slice(0, 220);
     }
+    // Fallback: just take text past the author/date metadata block
+    if (!review || review.length < 15) {
+      const parts = plain.split(/\b(?:Date|Read|Shelves|Bookshelves|Rating):/i);
+      if (parts.length > 1) {
+        review = parts[parts.length - 1]
+          .replace(/\s*(View all my reviews|Read more\.?)\s*$/i, '')
+          .trim().slice(0, 220);
+      }
+    }
+
     return { title, author, cover, link, rating, review };
   }).filter(b => b.title);
 }
 
 async function loadGoodreads(force=false) {
-  const ck='gr_v5', tk='gr_ts_v5';
+  const ck='gr_v6', tk='gr_ts_v6';
   if (!force) {
     const ts=parseInt(localStorage.getItem(tk)||'0'), raw=localStorage.getItem(ck);
     if (raw&&Date.now()-ts<GR_TTL) { try{grCache=JSON.parse(raw);renderBooks();return;}catch(_){} }

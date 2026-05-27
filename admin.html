@@ -365,7 +365,7 @@
         <div class="field"><label>Goodreads User ID</label>
           <input type="text" id="f-gr-id" value="20847060" oninput="if(!DATA.goodreads)DATA.goodreads={};DATA.goodreads.userId=this.value;markDirty()" />
           <div class="field-hint">Numeric ID from your profile URL.</div></div>
-        <button class="btn-add" style="margin-top:0.5rem" onclick="localStorage.removeItem('gr_v4');localStorage.removeItem('gr_ts_v4');alert('Goodreads cache cleared.')">↺ Clear Cache</button>
+        <button class="btn-add" style="margin-top:0.5rem" onclick="localStorage.removeItem('gr_v6');localStorage.removeItem('gr_ts_v6');alert('Goodreads cache cleared.')">↺ Clear Cache</button>
       </div>
 
       <!-- WATCH -->
@@ -843,7 +843,14 @@ function renderTLCards(){
         <div class="field"><label>End</label><input type="text" value="${esc(item.endDate)}" oninput="updateTL(${i},'endDate',this.value)" placeholder="Present"/></div>
         <div class="field"><label>Duration</label><input type="text" value="${esc(item.duration)}" oninput="updateTL(${i},'duration',this.value)" placeholder="~1 yr"/></div>
       </div>
-      <div class="field"><label>Bullets (one per line)</label><textarea oninput="updateTLBullets(${i},this.value)">${item.bullets.join('\n')}</textarea></div>
+      <div class="field"><label>Bullets (one per line — HTML allowed: &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;)</label>
+        <div style="display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap">
+          <button class="rte-btn" style="font-size:0.7rem;padding:2px 8px" onclick="wrapTLBullet(${i},'<strong>','</strong>')"><b>B</b></button>
+          <button class="rte-btn" style="font-size:0.7rem;padding:2px 8px" onclick="wrapTLBullet(${i},'<em>','</em>')"><i>I</i></button>
+          <button class="rte-btn" style="font-size:0.7rem;padding:2px 8px" onclick="wrapTLBullet(${i},'<a href=\\'\\'' target=\\'_blank\\'>','</a>')">🔗</button>
+          <span style="font-size:0.68rem;color:var(--muted2);align-self:center;margin-left:4px">Select text then click</span>
+        </div>
+        <textarea id="tl-bullets-${i}" oninput="updateTLBullets(${i},this.value)" style="font-family:var(--mono);font-size:0.78rem">${item.bullets.join('\n')}</textarea></div>
     </div>`).join('');
 }
 function updateTL(i,k,v){DATA.timeline[i][k]=v;document.querySelector(`[data-tl="${i}"] .ic-title`).textContent=DATA.timeline[i].company||'New Role';markDirty();}
@@ -851,6 +858,14 @@ function updateTLBullets(i,v){DATA.timeline[i].bullets=v.split('\n').filter(l=>l
 function moveTL(i,d){[DATA.timeline[i],DATA.timeline[i+d]]=[DATA.timeline[i+d],DATA.timeline[i]];renderTLCards();markDirty();}
 function removeTL(i){if(!confirm('Remove?'))return;DATA.timeline.splice(i,1);renderTLCards();markDirty();}
 function addTL(){DATA.timeline.push({id:Date.now().toString(),company:'',role:'',subtext:'',website:'',logo:'',type:'work',startDate:'',endDate:'Present',duration:'',bullets:['']});renderTLCards();markDirty();}
+function wrapTLBullet(i,open,close){
+  const ta=document.getElementById('tl-bullets-'+i);if(!ta)return;
+  const s=ta.selectionStart,e=ta.selectionEnd,val=ta.value;
+  const sel=val.slice(s,e)||'text';
+  ta.value=val.slice(0,s)+open+sel+close+val.slice(e);
+  ta.selectionStart=s+open.length;ta.selectionEnd=s+open.length+sel.length;
+  ta.focus();updateTLBullets(i,ta.value);
+}
 
 // ═══════════════════════════════════════
 //  PROJECTS
@@ -868,6 +883,12 @@ function renderProjCards(){
       <div class="field"><label>Title</label><input type="text" value="${esc(p.title)}" oninput="updateProj(${i},'title',this.value)"/></div>
       <div class="field"><label>Description</label><textarea oninput="updateProj(${i},'description',this.value)">${esc(p.description)}</textarea></div>
       <div class="field"><label>URL</label><input type="text" value="${esc(p.url)}" oninput="updateProj(${i},'url',this.value)"/></div>
+      <div class="field"><label>Cover Image URL <span style="font-weight:400;font-size:.8em;color:var(--muted2)">(optional — shown on card)</span></label>
+        <input type="text" value="${esc(p.image||'')}" oninput="updateProj(${i},'image',this.value)" placeholder="https://…"/>
+        ${p.image?`<img src="${esc(p.image)}" style="margin-top:0.5rem;max-height:80px;border-radius:6px;object-fit:cover;display:block" onerror="this.style.display='none'" />`:''}
+        <button class="btn-photo" style="margin-top:0.4rem;font-size:0.72rem" onclick="document.getElementById('proj-img-file-${i}').click()">Upload Image</button>
+        <input type="file" id="proj-img-file-${i}" accept="image/*" style="display:none" onchange="handleProjImg(event,${i})" />
+      </div>
       <div class="field"><label>Tags (comma-separated)</label><input type="text" value="${p.tags.join(', ')}" oninput="updateProjTags(${i},this.value)"/></div>
     </div>`).join('');
 }
@@ -875,7 +896,8 @@ function updateProj(i,k,v){DATA.projects[i][k]=v;document.querySelector(`[data-p
 function updateProjTags(i,v){DATA.projects[i].tags=v.split(',').map(t=>t.trim()).filter(Boolean);markDirty();}
 function moveProj(i,d){[DATA.projects[i],DATA.projects[i+d]]=[DATA.projects[i+d],DATA.projects[i]];renderProjCards();markDirty();}
 function removeProj(i){if(!confirm('Remove?'))return;DATA.projects.splice(i,1);renderProjCards();markDirty();}
-function addProj(){DATA.projects.push({id:Date.now().toString(),title:'',description:'',url:'',tags:[]});renderProjCards();markDirty();}
+function addProj(){DATA.projects.push({id:Date.now().toString(),title:'',description:'',url:'',image:'',tags:[]});renderProjCards();markDirty();}
+function handleProjImg(e,i){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{DATA.projects[i].image=ev.target.result;renderProjCards();markDirty();};r.readAsDataURL(f);}
 
 // ═══════════════════════════════════════
 //  QUIZ
